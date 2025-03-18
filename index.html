@@ -2,18 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Lista de Películas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor de Películas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .movies { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .movie { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
-        .movie img { width: 100%; height: 400px; object-fit: cover; }
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #141414; color: #fff; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .movies { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .movie { background-color: #1f1f1f; border-radius: 8px; overflow: hidden; transition: transform 0.3s; }
+        .movie:hover { transform: scale(1.03); }
+        .movie img { width: 100%; height: 380px; object-fit: cover; }
         .movie-info { padding: 15px; }
         h2 { margin-top: 0; font-size: 18px; }
-        .genres { color: #666; font-size: 14px; margin-bottom: 10px; }
-        .synopsis { font-size: 14px; line-height: 1.4; margin-bottom: 15px; }
-        .play-btn { background: #e50914; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .genres { color: #999; font-size: 14px; margin-bottom: 10px; }
+        .synopsis { font-size: 14px; line-height: 1.4; margin-bottom: 15px; color: #ccc; }
+        .play-btn { background: #e50914; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; transition: background 0.3s; }
         .play-btn:hover { background: #f40612; }
+        
+        /* Player modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 999; }
+        .modal-content { position: relative; width: 90%; max-width: 1000px; margin: 5% auto; }
+        .close-modal { position: absolute; top: -40px; right: 0; color: white; font-size: 28px; font-weight: bold; cursor: pointer; }
+        #videoPlayer { width: 100%; height: 0; padding-bottom: 56.25%; /* 16:9 aspect ratio */ }
+        video { width: 100%; height: 100%; position: absolute; }
+        .movie-details { padding: 20px; background-color: #1f1f1f; border-radius: 0 0 8px 8px; }
+        .movie-title { margin-top: 0; }
     </style>
 </head>
 <body>
@@ -25,7 +38,7 @@
                 <h2>El jardinero</h2>
                 <div class="genres">Acción, Comedia</div>
                 <div class="synopsis">Serge guarda un secreto de Estado. Él, su familia y el jardinero Leo aparecen en una lista negra del gobierno. Intentan idear un plan para seguir con vida.</div>
-                <a href="https://r63hfpdmodtc.premilkyway.com/hls2/01/08878/rswfc6pc49w2_,l,n,.urlset/index-f2-v1-a1.m3u8?t=8UF1ZnVH15UHkCPDbplWFWANAP3b0I2nf_RcFwXx8l8&s=1742333573&e=129600&f=44390394&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <button class="play-btn" data-src="https://r63hfpdmodtc.premilkyway.com/hls2/01/08878/rswfc6pc49w2_,l,n,.urlset/index-f2-v1-a1.m3u8?t=8UF1ZnVH15UHkCPDbplWFWANAP3b0I2nf_RcFwXx8l8&s=1742333573&e=129600&f=44390394&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" data-title="El jardinero">Reproducir</button>
             </div>
         </div>
 
@@ -34,8 +47,8 @@
             <div class="movie-info">
                 <h2>Rumours</h2>
                 <div class="genres">Comedia, Terror</div>
-                <div class="synopsis">Los líderes de siete democracias mas ricas del mundo se pierden en un bosque, al tiempo que tratan de redactar una declaración sobre una crisis mundial, enfrentándose a peligros mientras intentan encontrar la salida.</div>
-                <a href="https://vwyn3lxe5fv5.premilkyway.com/hls2/01/08878/bayv83mrmyw8_,l,n,h,.urlset/index-f3-v1-a1.m3u8?t=25RDRMFnBNeQXb2u42uceviXx4fP_GvYPHx6yAicsPI&s=1742333722&e=129600&f=44391615&srv=z13jtbat10fa85i&i=0.4&sp=500&p1=z13jtbat10fa85i&p2=z13jtbat10fa85i&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <div class="synopsis">Los líderes de siete democracias mas ricas del mundo se pierden en un bosque, al tiempo que tratan de redactar una declaración sobre una crisis mundial.</div>
+                <button class="play-btn" data-src="https://vwyn3lxe5fv5.premilkyway.com/hls2/01/08878/bayv83mrmyw8_,l,n,h,.urlset/index-f3-v1-a1.m3u8?t=25RDRMFnBNeQXb2u42uceviXx4fP_GvYPHx6yAicsPI&s=1742333722&e=129600&f=44391615&srv=z13jtbat10fa85i&i=0.4&sp=500&p1=z13jtbat10fa85i&p2=z13jtbat10fa85i&asn=273133" data-title="Rumours">Reproducir</button>
             </div>
         </div>
 
@@ -45,7 +58,7 @@
                 <h2>Ritual maldito</h2>
                 <div class="genres">Terror, Suspenso</div>
                 <div class="synopsis">Un chico mudo se ve atrapado en su apartamento con un monstruo siniestro después de pedir un deseo.</div>
-                <a href="https://cyyroro04xrqr.premilkyway.com/hls2/01/08701/uzqlw4eyr47a_,l,n,.urlset/index-f2-v1-a1.m3u8?t=neOpHHikOLJtzzpqIC9agu3FL-zD7qkxZhKogNx1WHM&s=1742334273&e=129600&f=43508853&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <button class="play-btn" data-src="https://cyyroro04xrqr.premilkyway.com/hls2/01/08701/uzqlw4eyr47a_,l,n,.urlset/index-f2-v1-a1.m3u8?t=neOpHHikOLJtzzpqIC9agu3FL-zD7qkxZhKogNx1WHM&s=1742334273&e=129600&f=43508853&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="Ritual maldito">Reproducir</button>
             </div>
         </div>
 
@@ -54,8 +67,8 @@
             <div class="movie-info">
                 <h2>Una muerte antes de una boda</h2>
                 <div class="genres">Comedia, Romance</div>
-                <div class="synopsis">Cuando Maja vuelve a casa con su prometido, sus tradicionales padres deben superar los prejuicios culturales en medio de una crisis en su lechería. ¿Triunfará el amor?</div>
-                <a href="https://bxs5xkxkyi4y.premilkyway.com/hls2/01/08701/fh3gwmmnlqt3_,l,n,h,.urlset/index-f1-v1-a1.m3u8?t=nBAWwMChbobpFIK0lhwALI0XeLO-9lITcHtenDDg_ik&s=1742334388&e=129600&f=43507826&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <div class="synopsis">Cuando Maja vuelve a casa con su prometido, sus tradicionales padres deben superar los prejuicios culturales.</div>
+                <button class="play-btn" data-src="https://bxs5xkxkyi4y.premilkyway.com/hls2/01/08701/fh3gwmmnlqt3_,l,n,h,.urlset/index-f1-v1-a1.m3u8?t=nBAWwMChbobpFIK0lhwALI0XeLO-9lITcHtenDDg_ik&s=1742334388&e=129600&f=43507826&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="Una muerte antes de una boda">Reproducir</button>
             </div>
         </div>
 
@@ -64,8 +77,8 @@
             <div class="movie-info">
                 <h2>El hilo rojo</h2>
                 <div class="genres">Drama, Romance</div>
-                <div class="synopsis">Abril, una azafata rebelde y audaz, y Manuel, un tímido y tradicional empresario, se conocen en un avión y sienten instantáneamente una atracción innegable.</div>
-                <a href="https://m5qilv3g2l.premilkyway.com/hls2/01/08701/tspdeoz4ejv9_,l,n,.urlset/index-f2-v1-a1.m3u8?t=ivaFiDFUy0p3pT-CRgwwy_uyeQuQADD-cL-SP2DXeFo&s=1742334557&e=129600&f=43507735&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <div class="synopsis">Abril, una azafata rebelde y audaz, y Manuel, un tímido y tradicional empresario, se conocen en un avión.</div>
+                <button class="play-btn" data-src="https://m5qilv3g2l.premilkyway.com/hls2/01/08701/tspdeoz4ejv9_,l,n,.urlset/index-f2-v1-a1.m3u8?t=ivaFiDFUy0p3pT-CRgwwy_uyeQuQADD-cL-SP2DXeFo&s=1742334557&e=129600&f=43507735&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="El hilo rojo">Reproducir</button>
             </div>
         </div>
 
@@ -74,8 +87,8 @@
             <div class="movie-info">
                 <h2>El caos está en el aire</h2>
                 <div class="genres">Romance, Comedia, Drama</div>
-                <div class="synopsis">Una pareja de Estocolmo planea casarse en la isla de Gotlandia, pero las tradiciones impuestas por sus familias convierten el gran día en un desastre.</div>
-                <a href="https://m5qilv3g2l.premilkyway.com/hls2/01/08701/0mvx39w6f4yu_,l,n,.urlset/index-f2-v1-a1.m3u8?t=j6dydoy5EsxlDsU0gSdotI5sJkJrgIuIIBjgHXGRlxI&s=1742334691&e=129600&f=43506053&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <div class="synopsis">Una pareja de Estocolmo planea casarse en la isla de Gotlandia, pero las tradiciones impuestas por sus familias convierten el día en un desastre.</div>
+                <button class="play-btn" data-src="https://m5qilv3g2l.premilkyway.com/hls2/01/08701/0mvx39w6f4yu_,l,n,.urlset/index-f2-v1-a1.m3u8?t=j6dydoy5EsxlDsU0gSdotI5sJkJrgIuIIBjgHXGRlxI&s=1742334691&e=129600&f=43506053&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="El caos está en el aire">Reproducir</button>
             </div>
         </div>
 
@@ -85,7 +98,7 @@
                 <h2>Salva el Mundo</h2>
                 <div class="genres">Comedia, Acción</div>
                 <div class="synopsis">El mundo está en peligro. Mou, el super agente más especial tiene que salvarlo, Luna una enigmática sicaria llena de flow intentará detenerlo.</div>
-                <a href="https://27u55xdzmm9q.premilkyway.com/hls2/01/08701/oe4wsfbmz913_,l,n,.urlset/index-f2-v1-a1.m3u8?t=qg2kuce-EYoMSD5tgqfhOE4z_qipuR9lRV6gppepf4c&s=1742334856&e=129600&f=43505108&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <button class="play-btn" data-src="https://27u55xdzmm9q.premilkyway.com/hls2/01/08701/oe4wsfbmz913_,l,n,.urlset/index-f2-v1-a1.m3u8?t=qg2kuce-EYoMSD5tgqfhOE4z_qipuR9lRV6gppepf4c&s=1742334856&e=129600&f=43505108&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" data-title="Salva el Mundo">Reproducir</button>
             </div>
         </div>
 
@@ -94,8 +107,8 @@
             <div class="movie-info">
                 <h2>La ausencia del Edén</h2>
                 <div class="genres">Suspenso, Drama, Romance, Crimen</div>
-                <div class="synopsis">Un agente del ICE que se enfrenta a los dilemas morales de la seguridad fronteriza y una mujer indocumentada que lucha por escapar de un despiadado cártel se cruzan y trabajan juntos para salvar la vida de una niña inocente.</div>
-                <a href="https://e9ccawf5esyyffhp.premilkyway.com/hls2/01/08700/b8vxmw0dsjbo_,l,n,.urlset/index-f2-v1-a1.m3u8?t=Y9vEileJAdIlZtkSim7J29oEwhmev-4yKUoYnMjHrcY&s=1742335158&e=129600&f=43504197&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <div class="synopsis">Un agente del ICE y una mujer indocumentada se cruzan y trabajan juntos para salvar la vida de una niña inocente.</div>
+                <button class="play-btn" data-src="https://e9ccawf5esyyffhp.premilkyway.com/hls2/01/08700/b8vxmw0dsjbo_,l,n,.urlset/index-f2-v1-a1.m3u8?t=Y9vEileJAdIlZtkSim7J29oEwhmev-4yKUoYnMjHrcY&s=1742335158&e=129600&f=43504197&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" data-title="La ausencia del Edén">Reproducir</button>
             </div>
         </div>
 
@@ -104,10 +117,87 @@
             <div class="movie-info">
                 <h2>El Experimento del Sueño Soviético</h2>
                 <div class="genres">Misterio, Suspenso, Terror</div>
-                <div class="synopsis">Investigadores rusos a finales de la década de 1940 mantienen a cinco personas despiertas durante quince días usando un estimulante experimental. Basado en la popular historia de terror en Internet (Creepypasta) "The Russian Sleep Experiment".</div>
-                <a href="https://62lcxnbxr456.premilkyway.com/hls2/01/08522/l43dirl084tr_n/index-v1-a1.m3u8?t=mxXq-yaQ6jczYfIoFERf4XN6DmqS1OGGrxHngdA8_A4&s=1742335324&e=129600&f=42611130&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" target="_blank"><button class="play-btn">Reproducir</button></a>
+                <div class="synopsis">Investigadores rusos mantienen a cinco personas despiertas durante quince días usando un estimulante experimental.</div>
+                <button class="play-btn" data-src="https://62lcxnbxr456.premilkyway.com/hls2/01/08522/l43dirl084tr_n/index-v1-a1.m3u8?t=mxXq-yaQ6jczYfIoFERf4XN6DmqS1OGGrxHngdA8_A4&s=1742335324&e=129600&f=42611130&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="El Experimento del Sueño Soviético">Reproducir</button>
             </div>
         </div>
     </div>
+
+    <!-- Modal Player -->
+    <div id="playerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="videoPlayer">
+                <video id="video" controls></video>
+            </div>
+            <div class="movie-details">
+                <h3 id="modalMovieTitle" class="movie-title">Título de la película</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('playerModal');
+            const video = document.getElementById('video');
+            const modalTitle = document.getElementById('modalMovieTitle');
+            const closeBtn = document.querySelector('.close-modal');
+            const playButtons = document.querySelectorAll('.play-btn');
+            let hls;
+
+            // Open modal and play video
+            playButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const videoSrc = this.getAttribute('data-src');
+                    const title = this.getAttribute('data-title');
+                    
+                    modalTitle.textContent = title;
+                    modal.style.display = 'block';
+                    
+                    if (Hls.isSupported()) {
+                        if (hls) {
+                            hls.destroy();
+                        }
+                        
+                        hls = new Hls();
+                        hls.loadSource(videoSrc);
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                            video.play();
+                        });
+                    } 
+                    // For browsers that support native HLS (Safari, iOS)
+                    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        video.src = videoSrc;
+                        video.addEventListener('loadedmetadata', function() {
+                            video.play();
+                        });
+                    }
+                });
+            });
+
+            // Close modal
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+                video.pause();
+                video.src = '';
+                if (hls) {
+                    hls.destroy();
+                }
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                    video.pause();
+                    video.src = '';
+                    if (hls) {
+                        hls.destroy();
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
