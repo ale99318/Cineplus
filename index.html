@@ -2,718 +2,101 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Videos</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.10"></script>
+    <title>Lista de Películas</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center;
-            background-color: #121212;
-            margin: 0;
-            padding: 20px;
-            color: #e0e0e0;
-        }
-        .container { 
-            max-width: 1000px; 
-            margin: auto;
-            background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            position: relative;
-        }
-        .dropdown { 
-            padding: 8px 15px;
-            margin: 10px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            background-color: #252525;
-            color: #e0e0e0;
-        }
-        .catalogo { 
-            display: flex; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-            gap: 15px;
-            margin-top: 25px;
-        }
-        .item { 
-            margin: 5px; 
-            cursor: pointer; 
-            transition: transform 0.3s;
-            width: 160px;
-        }
-        .item:hover {
-            transform: scale(1.05);
-        }
-        .item img { 
-            width: 150px; 
-            height: 220px; 
-            border-radius: 6px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        }
-        .item p {
-            margin: 5px 0;
-        }
-        #videoContainer { 
-            display: none; 
-            margin-top: 30px;
-            background-color: #252525;
-            padding: 15px;
-            border-radius: 8px;
-            z-index: 5;
-            position: relative;
-        }
-        #videoPlayer {
-            max-width: 100%;
-            border-radius: 4px;
-            z-index: 6;
-        }
-        .error-message {
-            color: #ff5555;
-            margin-top: 10px;
-            display: none;
-        }
-        h1, h2 {
-            color: #e0e0e0;
-        }
-        .sinopsis-container {
-            background-color: #252525;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 8px;
-            text-align: left;
-            display: none;
-            position: relative;
-            z-index: 5;
-        }
-        .sinopsis-container h3 {
-            margin-top: 0;
-        }
-        .btn-cerrar {
-            background-color: #e63946;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        /* Estilos para los anuncios */
-        .ad-container {
-            margin: 20px auto;
-            background-color: #252525;
-            padding: 5px;
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-            cursor: pointer;
-        }
-        .ad-label {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: rgba(0,0,0,0.5);
-            color: #fff;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-        .ad-banner {
-            width: 100%;
-            text-align: center;
-            margin: 0 auto;
-            display: block;
-        }
-        .side-ad {
-            position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
-            right: 20px;
-            z-index: 2;
-        }
-        .footer-ad {
-            margin-top: 30px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: #252525;
-        }
-        /* Hacer que los anuncios sean más llamativos */
-        .ad-highlight {
-            animation: pulse 2s infinite;
-            border: 2px solid #4CAF50;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-        }
-        .sticky-ad {
-            position: sticky;
-            top: 10px;
-            z-index: 1;
-            margin-bottom: 20px;
-        }
-        /* Estilos para el botón de cerrar anuncio flotante */
-        .close-side-ad {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        /* Ajustes para asegurar que los anuncios no tapen el contenido */
-        .video-ad {
-            position: relative;
-            margin: 20px 0;
-            clear: both;
-            z-index: 1;
-        }
-        /* Separación entre anuncios y reproductor */
-        .video-separator {
-            margin: 20px 0;
-            height: 2px;
-            background-color: #333;
-        }
-        /* Estilos para el modal de YouTube */
-        #youtubeModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.9);
-            z-index: 1000;
-            overflow: auto;
-        }
-        .youtube-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 800px;
-        }
-        .youtube-container iframe {
-            width: 100%;
-            height: 450px;
-            border: none;
-        }
-        .close-youtube {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .youtube-text {
-            color: white;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .btn-like {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 10px 15px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 16px;
-        }
-        /* Placeholder para anuncios bloqueados */
-        .ad-placeholder {
-            width: 100%;
-            height: 90px;
-            background-color: #252525;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-style: italic;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .movies { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .movie { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .movie img { width: 100%; height: 400px; object-fit: cover; }
+        .movie-info { padding: 15px; }
+        h2 { margin-top: 0; font-size: 18px; }
+        .genres { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .synopsis { font-size: 14px; line-height: 1.4; }
     </style>
 </head>
 <body>
-    <!-- Modal para YouTube -->
-    <div id="youtubeModal">
-        <div class="youtube-container">
-            <span class="close-youtube" onclick="closeYoutubeModal()">&times;</span>
-            <iframe id="youtubePlayer" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            <div class="youtube-text">
-                <p>Para continuar viendo nuestro contenido, por favor da like al video y suscríbete a nuestro canal.</p>
-                <button class="btn-like" onclick="videoLiked()">¡He dado like y me he suscrito!</button>
+    <h1>Catálogo de Películas</h1>
+    <div class="movies">
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Fx9SrxVaRhBNKf95vns1ti13yzl0.jpg&w=640&q=75" alt="El jardinero">
+            <div class="movie-info">
+                <h2>El jardinero</h2>
+                <div class="genres">Acción, Comedia</div>
+                <div class="synopsis">Serge guarda un secreto de Estado. Él, su familia y el jardinero Leo aparecen en una lista negra del gobierno. Intentan idear un plan para seguir con vida.</div>
+            </div>
+        </div>
+
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Fa7Ijn4fEnYjGl45OoyxBOnFy7Hc.jpg&w=640&q=75" alt="Rumours">
+            <div class="movie-info">
+                <h2>Rumours</h2>
+                <div class="genres">Comedia, Terror</div>
+                <div class="synopsis">Los líderes de siete democracias mas ricas del mundo se pierden en un bosque, al tiempo que tratan de redactar una declaración sobre una crisis mundial, enfrentándose a peligros mientras intentan encontrar la salida.</div>
+            </div>
+        </div>
+
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FfYw6hMTAces9aWbiE4Nscr50E38.jpg&w=640&q=75" alt="Ritual maldito">
+            <div class="movie-info">
+                <h2>Ritual maldito</h2>
+                <div class="genres">Terror, Suspenso</div>
+                <div class="synopsis">Un chico mudo se ve atrapado en su apartamento con un monstruo siniestro después de pedir un deseo.</div>
+            </div>
+        </div>
+
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FbOVmksfmax1kA7FF0pmCq89TrF4.jpg&w=640&q=75" alt="Una muerte antes de una boda">
+            <div class="movie-info">
+                <h2>Una muerte antes de una boda</h2>
+                <div class="genres">Comedia, Romance</div>
+                <div class="synopsis">Cuando Maja vuelve a casa con su prometido, sus tradicionales padres deben superar los prejuicios culturales en medio de una crisis en su lechería. ¿Triunfará el amor?</div>
+            </div>
+        </div>
+
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FmZ8Z4jCDVlBflEuCOwH3NCDyqBP.jpg&w=640&q=75" alt="El hilo rojo">
+            <div class="movie-info">
+                <h2>El hilo rojo</h2>
+                <div class="genres">Drama, Romance</div>
+                <div class="synopsis">Abril, una azafata rebelde y audaz, y Manuel, un tímido y tradicional empresario, se conocen en un avión y sienten instantáneamente una atracción innegable.</div>
+            </div>
+        </div>
+
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2F7DBLmQ1Dy3PqWJV5FWzo9i3RMGd.jpg&w=640&q=75" alt="El caos está en el aire">
+            <div class="movie-info">
+                <h2>El caos está en el aire</h2>
+                <div class="genres">Romance, Comedia, Drama</div>
+                <div class="synopsis">Una pareja de Estocolmo planea casarse en la isla de Gotlandia, pero las tradiciones impuestas por sus familias convierten el gran día en un desastre.</div>
+            </div>
+        </div>
+
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2F97ZrH1gDQATCm9kZ9VUUnsdTfSq.jpg&w=640&q=75" alt="Salva el Mundo">
+            <div class="movie-info">
+                <h2>Salva el Mundo</h2>
+                <div class="genres">Comedia, Acción</div>
+                <div class="synopsis">El mundo está en peligro. Mou, el super agente más especial tiene que salvarlo, Luna una enigmática sicaria llena de flow intentará detenerlo.</div>
+            </div>
+        </div>
+
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FzDJnfsCueDsBNw5QxUJRw58nCke.jpg&w=640&q=75" alt="La ausencia del Edén">
+            <div class="movie-info">
+                <h2>La ausencia del Edén</h2>
+                <div class="genres">Suspenso, Drama, Romance, Crimen</div>
+                <div class="synopsis">Un agente del ICE que se enfrenta a los dilemas morales de la seguridad fronteriza y una mujer indocumentada que lucha por escapar de un despiadado cártel se cruzan y trabajan juntos para salvar la vida de una niña inocente.</div>
+            </div>
+        </div>
+
+        <div class="movie">
+            <img src="https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Flewl4MaThWOSeqGOqZQocpRtP4U.jpg&w=640&q=75" alt="El Experimento del Sueño Soviético">
+            <div class="movie-info">
+                <h2>El Experimento del Sueño Soviético</h2>
+                <div class="genres">Misterio, Suspenso, Terror</div>
+                <div class="synopsis">Investigadores rusos a finales de la década de 1940 mantienen a cinco personas despiertas durante quince días usando un estimulante experimental. Basado en la popular historia de terror en Internet (Creepypasta) "The Russian Sleep Experiment".</div>
             </div>
         </div>
     </div>
-
-    <!-- Anuncio superior con fallback -->
-    <div class="ad-container ad-highlight">
-        <div class="ad-label">Publicidad</div>
-        <div class="ad-placeholder">Espacio reservado para publicidad</div>
-    </div>
-
-    <div class="container">
-        <h1>Catálogo de Videos</h1>
-        
-        <select id="categoria" class="dropdown">
-            <option value="">Selecciona una categoría</option>
-            <option value="peliculas">Películas</option>
-            <option value="series">Series</option>
-        </select>
-        
-        <div id="catalogo" class="catalogo"></div>
-        
-        <div id="sinopsisContainer" class="sinopsis-container">
-            <h3 id="sinopsisTitulo"></h3>
-            <p id="sinopsisTexto"></p>
-            <button id="btnCerrarSinopsis" class="btn-cerrar">Cerrar</button>
-            <button id="btnVerVideo" class="btn-cerrar" style="background-color: #4CAF50; margin-left: 10px;">Ver video</button>
-            
-            <!-- Anuncio dentro del contenedor de sinopsis con fallback -->
-            <div class="ad-container" style="margin-top: 15px;">
-                <div class="ad-label">Publicidad</div>
-                <div class="ad-placeholder">Espacio reservado para publicidad</div>
-            </div>
-        </div>
-        
-        <div id="videoContainer">
-            <h2 id="videoTitulo"></h2>
-            
-            <!-- Anuncio antes del video con fallback -->
-            <div class="video-ad">
-                <div class="ad-container">
-                    <div class="ad-label">Publicidad</div>
-                    <div class="ad-placeholder">Espacio reservado para publicidad</div>
-                </div>
-            </div>
-            
-            <div class="video-separator"></div>
-            
-            <!-- El reproductor de video ahora está más protegido -->
-            <div style="position: relative; z-index: 10;">
-                <video id="videoPlayer" width="800" height="450" controls></video>
-                <div id="errorMessage" class="error-message">
-                    No se pudo cargar el video. Por favor intenta nuevamente más tarde.
-                </div>
-            </div>
-            
-            <div class="video-separator"></div>
-            
-            <!-- Anuncio después del video con fallback -->
-            <div class="video-ad">
-                <div class="ad-container">
-                    <div class="ad-label">Publicidad</div>
-                    <div class="ad-placeholder">Espacio reservado para publicidad</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Anuncio en el pie de página con fallback -->
-        <div class="footer-ad">
-            <div class="ad-label">Publicidad</div>
-            <div class="ad-placeholder">Espacio reservado para publicidad</div>
-        </div>
-    </div>
-    
-    <!-- Anuncio lateral flotante con fallback -->
-    <div id="sideAd" class="side-ad" style="right: 10px;">
-        <button class="close-side-ad" onclick="document.getElementById('sideAd').style.display='none'">×</button>
-        <div class="ad-container">
-            <div class="ad-label">Publicidad</div>
-            <div class="ad-placeholder">Espacio reservado para publicidad</div>
-        </div>
-    </div>
-    
-    <script>
-        // Datos de ejemplo con sinopsis simplificado a solo Películas y Series
-        const data = {
-            peliculas: [
-                { 
-                    titulo: "Deadpool & Wolverine", 
-                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", 
-                    video: "https://yhqd4yg264.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/iframes-v1-a1.m3u8?t=lrorYmOTTWRgtQ9ipn1Gi5uhOp8hIYWeMikUglmswi4&s=1742312294&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133",
-                    sinopsis: "Deadpool deberá convencer a un Wolverine retirado para que regrese a la acción y salve el futuro multiversal. Juntos, estos dos antihéroes emprenderán un viaje épico que cambiará para siempre la cronología del MCU.",
-                    genero: "Acción"
-                },
-                { 
-                    titulo: "El Jardinero",
-                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Fx9SrxVaRhBNKf95vns1ti13yzl0.jpg&w=640&q=75",
-                    video: "https://r63hfpdmodtc.premilkyway.com/hls2/01/08878/rswfc6pc49w2_,l,n,.urlset/index-f2-v1-a1.m3u8?t=8UF1ZnVH15UHkCPDbplWFWANAP3b0I2nf_RcFwXx8l8&s=1742333573&e=129600&f=44390394&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133",
-                    sinopsis: "Serge guarda un secreto de Estado. Él, su familia y el jardinero Leo aparecen en una lista negra del gobierno. Intentan idear un plan para seguir con vida.",
-                    genero: "Acción"
-                },
-                { 
-                    titulo: "El Padrino", 
-                    imagen: "https://cuevana.biz/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", 
-                    video: "https://mx9skjnui4es.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/index-v1-a1.m3u8?t=69SPoqxIDY8iDKMBrje4nLfXAkpQQPoZasCka7y8FZA&s=1742313222&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133",
-                    sinopsis: "Sigue la historia del cardenal Lawrence, un hombre que tiene la tarea de dirigir un proceso encubierto para la elección de un nuevo Papa.",
-                    genero: "Drama"
-                },
-                {
-                    titulo: "Rumours",
-                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Fa7Ijn4fEnYjGl45OoyxBOnFy7Hc.jpg&w=640&q=75",
-                    video: "https://vwyn3lxe5fv5.premilkyway.com/hls2/01/08878/bayv83mrmyw8_,l,n,h,.urlset/index-f3-v1-a1.m3u8?t=25RDRMFnBNeQXb2u42uceviXx4fP_GvYPHx6yAicsPI&s=1742333722&e=129600&f=44391615&srv=z13jtbat10fa85i&i=0.4&sp=500&p1=z13jtbat10fa85i&p2=z13jtbat10fa85i&asn=273133",
-                    sinopsis: "Los líderes de siete democracias más ricas del mundo se pierden en un bosque, al tiempo que tratan de redactar una declaración sobre una crisis mundial, enfrentándose a peligros mientras intentan encontrar la salida.",
-                    genero: "Comedia"
-                }
-            ],
-            series: [
-                { 
-                    titulo: "Friends", 
-                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FbQ1fuCUJOuJgzK2NvZhj315xZX9.jpg&w=640&q=75", 
-                    video: "https://example.com/video4.m3u8",
-                    sinopsis: "Las aventuras y desventuras de seis amigos que viven en Manhattan. Rachel, Monica, Phoebe, Joey, Chandler y Ross conforman este grupo de inseparables amigos que viven en Nueva York y comparten su día a día.",
-                    genero: "Comedia"
-                },
-                { 
-                    titulo: "Stranger Things", 
-                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FvrfGm3HLsVUK9zUUMkuPf1kPc3c.jpg&w=640&q=75", 
-                    video: "https://example.com/video5.m3u8",
-                    sinopsis: "Cuando un niño desaparece en un pequeño pueblo, sus amigos, familiares y la policía se ven envueltos en una serie de eventos misteriosos al tratar de encontrarlo. Sus investigaciones les conducen a un extraño experimento secreto del gobierno y a una niña con poderes extraordinarios.",
-                    genero: "Terror"
-                }
-            ]
-        };
-        
-        // Variables globales para el item seleccionado
-        let selectedItem = null;
-        let hasAdBlocker = false;
-        let watchedYoutubeVideo = false;
-        
-        // Inicializar eventos
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeEventListeners();
-            checkForAdBlocker();
-            handleExtensionErrors();
-        });
-
-        // Función para manejar errores de extensiones
-        function handleExtensionErrors() {
-            // Añadir objeto bg para evitar errores de extensiones
-            if (typeof window.bg === 'undefined') {
-                window.bg = {
-                    // Métodos stub para evitar errores
-                    onCompleted: function() {},
-                    // Añadir otros métodos que puedan estar siendo llamados por las extensiones
-                    getRules: function() { return []; },
-                    getTypes: function() { return []; },
-                    addListener: function() {},
-                    removeListener: function() {}
-                };
-            }
-            
-            // Método para tratar de interceptar errores de extensiones
-            window.addEventListener('error', function(e) {
-                if (e.message && (
-                    e.message.includes('window.bg') || 
-                    e.message.includes('Cannot read properties of undefined')
-                )) {
-                    console.log('Interceptado error de extensión:', e.message);
-                    e.preventDefault();
-                    return true;
-                }
-                return false;
-            }, true);
-        }
-
-        // Función mejorada para comprobar si hay un bloqueador de anuncios
-        function checkForAdBlocker() {
-            const testAd = document.createElement('div');
-            testAd.innerHTML = '&nbsp;';
-            testAd.className = 'adsbox';
-            document.body.appendChild(testAd);
-            
-            setTimeout(function() {
-                if (testAd.offsetHeight === 0) {
-                    hasAdBlocker = true;
-                    console.log("Bloqueador de anuncios detectado");
-                    // Mostrar los placeholders para anuncios
-                    showAdPlaceholders();
-                }
-                document.body.removeChild(testAd);
-            }, 100);
-        }
-        
-        // Mostrar placeholders para anuncios bloqueados
-        function showAdPlaceholders() {
-            const adContainers = document.querySelectorAll('.ad-container');
-            adContainers.forEach(container => {
-                // Asegurarse de que el contenedor tenga un placeholder
-                if (!container.querySelector('.ad-placeholder')) {
-                    const placeholder = document.createElement('div');
-                    placeholder.className = 'ad-placeholder';
-                    placeholder.textContent = 'Espacio reservado para publicidad';
-                    container.appendChild(placeholder);
-                }
-            });
-        }
-        
-        // Configurar escuchadores de eventos
-        function initializeEventListeners() {
-            document.getElementById("categoria").addEventListener("change", handleCategoryChange);
-            document.getElementById("btnCerrarSinopsis").addEventListener("click", cerrarSinopsis);
-            document.getElementById("btnVerVideo").addEventListener("click", reproducirVideoSeleccionado);
-        }
-        
-        // Abrir modal de YouTube
-        function openYoutubeModal() {
-            const modal = document.getElementById("youtubeModal");
-            const youtubePlayer = document.getElementById("youtubePlayer");
-            
-            // Establecer la URL del video de YouTube
-            youtubePlayer.src = "https://www.youtube.com/embed/eLJewNB-kus?autoplay=1";
-            
-            modal.style.display = "block";
-        }
-        
-        // Cerrar modal de YouTube
-        function closeYoutubeModal() {
-            const modal = document.getElementById("youtubeModal");
-            const youtubePlayer = document.getElementById("youtubePlayer");
-            
-            // Detener el video de YouTube
-            youtubePlayer.src = "";
-            
-            modal.style.display = "none";
-        }
-        
-        // Marcar el video como visto cuando el usuario da like
-        function videoLiked() {
-            watchedYoutubeVideo = true;
-            closeYoutubeModal();
-            
-            // Si hay un elemento seleccionado, continuar con la reproducción
-            if (selectedItem) {
-                mostrarVideo(selectedItem);
-            }
-        }
-        
-        // Manejar cambio de categoría
-        function handleCategoryChange() {
-            const catalogoDiv = document.getElementById("catalogo");
-            const videoContainer = document.getElementById("videoContainer");
-            const sinopsisContainer = document.getElementById("sinopsisContainer");
-            
-            catalogoDiv.innerHTML = "";
-            videoContainer.style.display = "none";
-            sinopsisContainer.style.display = "none";
-            
-            if (this.value) {
-                // Ahora no hay subcategorías, mostramos todos los elementos directamente
-                data[this.value].forEach((item, index) => {
-                    let div = document.createElement("div");
-                    div.classList.add("item");
-                    div.innerHTML = `
-                        <img src="${item.imagen}" alt="${item.titulo}" 
-                             onerror="this.src='/api/placeholder/150/220?text=Sin+Imagen'">
-                        <p>${item.titulo}</p>
-                    `;
-                    div.addEventListener("click", () => mostrarSinopsis(item));
-                    catalogoDiv.appendChild(div);
-                });
-            }
-        }
-        
-        // Mostrar sinopsis
-        function mostrarSinopsis(item) {
-            selectedItem = item;
-            const sinopsisContainer = document.getElementById("sinopsisContainer");
-            const sinopsisTitulo = document.getElementById("sinopsisTitulo");
-            const sinopsisTexto = document.getElementById("sinopsisTexto");
-            
-            sinopsisTitulo.textContent = item.titulo;
-            sinopsisTexto.textContent = item.sinopsis;
-            
-            sinopsisContainer.style.display = "block";
-            
-            // Ocultar el video si estaba visible
-            document.getElementById("videoContainer").style.display = "none";
-            
-            // Scroll hasta la sinopsis
-            window.scrollTo({
-                top: sinopsisContainer.offsetTop,
-                behavior: 'smooth'
-            });
-        }
-        
-        // Cerrar sinopsis
-        function cerrarSinopsis() {
-            document.getElementById("sinopsisContainer").style.display = "none";
-        }
-        
-        // Reproducir video del item seleccionado
-        function reproducirVideoSeleccionado() {
-            if (selectedItem) {
-                // Si tiene bloqueador de anuncios y no ha visto el video de YouTube, mostrar el video
-                if (hasAdBlocker && !watchedYoutubeVideo) {
-                    openYoutubeModal();
-                } else {
-                    mostrarVideo(selectedItem);
-                }
-                cerrarSinopsis();
-            }
-        }
-        
-        // Mostrar video con tratamiento mejorado de errores
-        function mostrarVideo(item) {
-            const videoTitulo = document.getElementById("videoTitulo");
-            const video = document.getElementById("videoPlayer");
-            const videoContainer = document.getElementById("videoContainer");
-            const errorMessage = document.getElementById("errorMessage");
-            
-            videoTitulo.textContent = item.titulo;
-            errorMessage.style.display = "none";
-            
-            // Asegurar que el contenedor de video tenga alta prioridad visual
-            videoContainer.style.zIndex = "10";
-            
-            // Detener cualquier reproducción anterior
-            if (video.hls) {
-                try {
-                    video.hls.destroy();
-                } catch (e) {
-                    console.log("Error al destruir HLS:", e);
-                }
-                video.hls = null;
-            }
-            video.src = "";
-            
-            // Verificar que HLS esté correctamente cargado
-            if (typeof Hls === 'undefined') {
-                errorMessage.textContent = "Error: No se pudo cargar la librería HLS. Refresca la página o intenta más tarde.";
-                errorMessage.style.display = "block";
-                return;
-            }
-            
-            // Inicializar HLS con manejo de errores mejorado
-            if (Hls.isSupported()) {
-                try {
-                    const hls = new Hls({
-                        maxBufferLength: 30,
-                        maxBufferSize: 10 * 1000 * 1000, // 10MB
-                        debug: false,
-                        xhrSetup: function(xhr, url) {
-                            // Añadir retry para peticiones fallidas
-                            xhr.retryCount = 0;
-                            xhr.maxRetries = 3;
-                            xhr.onreadystatechange = function() {
-                                if (xhr.readyState === 4 && xhr.status >= 500 && xhr.retryCount < xhr.maxRetries) {
-                                    xhr.retryCount++;
-                                    setTimeout(function() {
-                                        console.log(`Reintentando petición (${xhr.retryCount}/${xhr.maxRetries})...`);
-                                        xhr.open('GET', url, true);
-                                        xhr.send();
-                                    }, 1000 * xhr.retryCount); // Backoff exponencial
-                                }
-                            };
-                        }
-                    });
-                    
-                    hls.on(Hls.Events.ERROR, function(event, data) {
-                        console.log("Error HLS:", data.type, data.details);
-                        if (data.fatal) {
-                            switch(data.type) {
-                                case Hls.ErrorTypes.NETWORK_ERROR:
-                                    // Intentar recuperarse de errores de red
-                                    console.log("Error de red fatal, intentando recuperar...");
-                                    hls.startLoad();
-                                    break;
-                                case Hls.ErrorTypes.MEDIA_ERROR:
-                                    console.log("Error de media fatal, intentando recuperar...");
-                                    hls.recoverMediaError();
-                                    break;
-                                default:
-                                    // Error no recuperable
-                                    console.error('Error fatal HLS:', data);
-                                    errorMessage.textContent = `Error al cargar el video: ${data.details}`;
-                                    errorMessage.style.display = "block";
-                                    hls.destroy();
-                                    break;
-                            }
-                        }
-                    });
-                    
-                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        video.play().catch(e => {
-                            console.warn('Reproducción automática bloqueada:', e);
-                            // Mostrar un mensaje al usuario
-                            const playButton = document.createElement('button');
-                            playButton.textContent = "Reproducir Video";
-                           playButton.style.cssText = "position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; padding: 10px 15px; background-color: #e63946; color: white; border: none; border-radius: 4px; cursor: pointer;";
-playButton.onclick = function() {
-    video.play().catch(e => console.error('Error al reproducir:', e));
-    this.remove();
-};
-video.parentNode.style.position = 'relative';
-video.parentNode.appendChild(playButton);
-
-// Asegurarnos de que la URL del video esté completa y sea válida
-const videoUrl = item.video || '';
-if (!videoUrl || videoUrl === 'https://example.com/video4.m3u8' || videoUrl === 'https://example.com/video5.m3u8') {
-    errorMessage.textContent = "Este video aún no está disponible. Por favor, intenta con otro contenido.";
-    errorMessage.style.display = "block";
-    return;
-}
-
-// Cargar la URL en HLS
-hls.loadSource(videoUrl);
-hls.attachMedia(video);
-video.hls = hls; // Guardar referencia para limpiar después
-
-// Mostrar el contenedor de video
-videoContainer.style.display = "block";
-
-// Desplazarse al reproductor
-window.scrollTo({
-    top: videoContainer.offsetTop - 20,
-    behavior: 'smooth'
-});
-
-} catch (error) {
-    console.error("Error al inicializar HLS:", error);
-    errorMessage.textContent = "Error al inicializar el reproductor. Por favor, recarga la página e intenta nuevamente.";
-    errorMessage.style.display = "block";
-}
-} 
-// Navegadores que soportan HLS nativamente (Safari)
-else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    try {
-        video.src = item.video;
-        video.addEventListener('loadedmetadata', function() {
-            video.play();
-        });
-        video.addEventListener('error', function() {
-            errorMessage.textContent = "Error al cargar el video. Por favor intenta nuevamente más tarde.";
-            errorMessage.style.display = "block";
-        });
-        videoContainer.style.display = "block";
-    } catch (e) {
-        console.error("Error en reproducción nativa:", e);
-        errorMessage.textContent = "Error al reproducir el video.";
-        errorMessage.style.display = "block";
-    }
-} else {
-    errorMessage.textContent = "Tu navegador no es compatible con la reproducción de este video.";
-    errorMessage.style.display = "block";
-}
-}
-    </script>
 </body>
 </html>
