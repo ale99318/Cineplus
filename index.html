@@ -21,6 +21,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            position: relative; /* Para control de posicionamiento */
         }
         .dropdown { 
             padding: 8px 15px;
@@ -61,10 +62,13 @@
             background-color: #252525;
             padding: 15px;
             border-radius: 8px;
+            z-index: 5; /* Asegura que esté por encima de otros elementos */
+            position: relative; /* Para control de posicionamiento */
         }
         #videoPlayer {
             max-width: 100%;
             border-radius: 4px;
+            z-index: 6; /* Asegura que el video siempre sea visible */
         }
         .error-message {
             color: #ff5555;
@@ -81,6 +85,8 @@
             border-radius: 8px;
             text-align: left;
             display: none;
+            position: relative; /* Para control de posicionamiento */
+            z-index: 5;
         }
         .sinopsis-container h3 {
             margin-top: 0;
@@ -126,7 +132,7 @@
             top: 50%;
             transform: translateY(-50%);
             right: 20px;
-            z-index: 100;
+            z-index: 2; /* Menor que el contenido principal */
         }
         .footer-ad {
             margin-top: 30px;
@@ -147,7 +153,8 @@
         .sticky-ad {
             position: sticky;
             top: 10px;
-            z-index: 99;
+            z-index: 1; /* Asegura que esté por debajo del contenido principal */
+            margin-bottom: 20px; /* Espacio para no tapar el contenido */
         }
         /* Estilos para el botón de cerrar anuncio flotante */
         .close-side-ad {
@@ -165,6 +172,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        /* Ajustes para asegurar que los anuncios no tapen el contenido */
+        .video-ad {
+            position: relative;
+            margin: 20px 0;
+            clear: both;
+            z-index: 1;
+        }
+        /* Separación entre anuncios y reproductor */
+        .video-separator {
+            margin: 20px 0;
+            height: 2px;
+            background-color: #333;
         }
     </style>
 </head>
@@ -195,8 +215,8 @@
         
         <select id="genero" class="dropdown" style="display: none;"></select>
         
-        <!-- Anuncio después de los selectores -->
-        <div class="ad-container sticky-ad">
+        <!-- Anuncio después de los selectores pero con altura controlada -->
+        <div class="ad-container" style="max-height: 120px; overflow: hidden;">
             <div class="ad-label">Publicidad</div>
             <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
             <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
@@ -210,7 +230,7 @@
             <button id="btnCerrarSinopsis" class="btn-cerrar">Cerrar</button>
             <button id="btnVerVideo" class="btn-cerrar" style="background-color: #4CAF50; margin-left: 10px;">Ver video</button>
             
-            <!-- Anuncio dentro del contenedor de sinopsis -->
+            <!-- Anuncio dentro del contenedor de sinopsis, posicionado después de los botones -->
             <div class="ad-container" style="margin-top: 15px;">
                 <div class="ad-label">Publicidad</div>
                 <script type="text/javascript">
@@ -229,26 +249,37 @@
         <div id="videoContainer">
             <h2 id="videoTitulo"></h2>
             
-            <!-- Anuncio antes del video -->
-            <div class="ad-container ad-highlight">
-                <div class="ad-label">Publicidad</div>
-                <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
+            <!-- Anuncio antes del video con espacio suficiente -->
+            <div class="video-ad">
+                <div class="ad-container">
+                    <div class="ad-label">Publicidad</div>
+                    <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
+                </div>
             </div>
             
-            <video id="videoPlayer" width="800" height="450" controls></video>
-            <div id="errorMessage" class="error-message">
-                No se pudo cargar el video. Por favor intenta nuevamente más tarde.
+            <div class="video-separator"></div>
+            
+            <!-- El reproductor de video ahora está más protegido -->
+            <div style="position: relative; z-index: 10;">
+                <video id="videoPlayer" width="800" height="450" controls></video>
+                <div id="errorMessage" class="error-message">
+                    No se pudo cargar el video. Por favor intenta nuevamente más tarde.
+                </div>
             </div>
             
-            <!-- Anuncio después del video -->
-            <div class="ad-container" style="margin-top: 15px;">
-                <div class="ad-label">Publicidad</div>
-                <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+            <div class="video-separator"></div>
+            
+            <!-- Anuncio después del video con espacio suficiente -->
+            <div class="video-ad">
+                <div class="ad-container">
+                    <div class="ad-label">Publicidad</div>
+                    <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+                </div>
             </div>
         </div>
         
         <!-- Anuncio en el pie de página -->
-        <div class="footer-ad ad-highlight">
+        <div class="footer-ad">
             <div class="ad-label">Publicidad</div>
             <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank" rel="noopener">
                 <img src="/api/placeholder/728/90" alt="Publicidad" style="max-width: 100%;">
@@ -256,8 +287,8 @@
         </div>
     </div>
     
-    <!-- Anuncio lateral flotante -->
-    <div id="sideAd" class="side-ad">
+    <!-- Anuncio lateral flotante movido más a la derecha y con opción para cerrarlo -->
+    <div id="sideAd" class="side-ad" style="right: 10px;">
         <button class="close-side-ad" onclick="document.getElementById('sideAd').style.display='none'">×</button>
         <div class="ad-container">
             <div class="ad-label">Publicidad</div>
@@ -426,9 +457,11 @@
         // Insertar anuncio en el catálogo
         function insertarAnuncioEnCatalogo(catalogoDiv) {
             const adDiv = document.createElement("div");
-            adDiv.className = "ad-container ad-highlight";
+            adDiv.className = "ad-container";
             adDiv.style.width = "100%";
             adDiv.style.margin = "10px 0";
+            adDiv.style.maxHeight = "100px"; // Controlar altura
+            adDiv.style.overflow = "hidden"; // Evitar desbordamiento
             adDiv.innerHTML = `
                 <div class="ad-label">Publicidad</div>
             `;
@@ -486,6 +519,9 @@
             videoTitulo.textContent = item.titulo;
             errorMessage.style.display = "none";
             
+            // Asegurar que el contenedor de video tenga alta prioridad visual
+            videoContainer.style.zIndex = "10";
+            
             // Detener cualquier reproducción anterior
             if (video.hls) {
                 video.hls.destroy();
@@ -537,6 +573,17 @@
             }
             
             videoContainer.style.display = "block";
+            
+            // Ocultar temporalmente el anuncio lateral para asegurar visibilidad del video
+            const sideAd = document.getElementById("sideAd");
+            if (sideAd) {
+                sideAd.style.display = "none";
+                // Volver a mostrar después de 5 segundos, cuando el usuario ya está viendo el video
+                setTimeout(() => {
+                    sideAd.style.display = "block";
+                }, 5000);
+            }
+            
             window.scrollTo({
                 top: videoContainer.offsetTop,
                 behavior: 'smooth'
