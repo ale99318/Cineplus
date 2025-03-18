@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reproductor de Películas</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #141414; color: #fff; }
         h1 { text-align: center; margin-bottom: 30px; }
@@ -23,10 +24,25 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 999; }
         .modal-content { position: relative; width: 90%; max-width: 1000px; margin: 5% auto; }
         .close-modal { position: absolute; top: -40px; right: 0; color: white; font-size: 28px; font-weight: bold; cursor: pointer; }
-        #videoPlayer { width: 100%; height: 0; padding-bottom: 56.25%; /* 16:9 aspect ratio */ }
+        #videoPlayer { width: 100%; height: 0; padding-bottom: 56.25%; /* 16:9 aspect ratio */ position: relative; }
         video { width: 100%; height: 100%; position: absolute; }
         .movie-details { padding: 20px; background-color: #1f1f1f; border-radius: 0 0 8px 8px; }
         .movie-title { margin-top: 0; }
+        
+        /* YouTube modal */
+        #youtubeModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 1000; }
+        .youtube-container { position: relative; width: 90%; max-width: 800px; margin: 5% auto; background-color: #1f1f1f; border-radius: 8px; padding: 20px; }
+        #youtubePlayer { width: 100%; aspect-ratio: 16/9; margin-bottom: 20px; }
+        .youtube-title { color: #fff; text-align: center; margin-bottom: 20px; }
+        .youtube-message { color: #ccc; margin-bottom: 20px; text-align: center; }
+        .youtube-timer { color: #e50914; font-size: 18px; text-align: center; margin-bottom: 20px; }
+        .action-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .action-btn { background: #e50914; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.3s; flex: 1; max-width: 200px; }
+        .action-btn:hover { background: #f40612; }
+        .action-btn:disabled { background: #5c5c5c; cursor: not-allowed; }
+        .checkbox-container { display: flex; align-items: center; justify-content: center; margin: 15px 0; }
+        .checkbox-container input { margin-right: 10px; transform: scale(1.5); }
+        .checkbox-container label { color: #ccc; }
     </style>
 </head>
 <body>
@@ -123,7 +139,28 @@
         </div>
     </div>
 
-    <!-- Modal Player -->
+    <!-- YouTube Verification Modal -->
+    <div id="youtubeModal" class="modal">
+        <div class="youtube-container">
+            <h3 class="youtube-title">¡Ver gratis!</h3>
+            <div class="youtube-message">Para ver la película gratis, mira este video durante 30 segundos, dale like y suscríbete al canal.</div>
+            <div id="youtubePlayer"></div>
+            <div class="youtube-timer">Tiempo restante: <span id="countdown">30</span> segundos</div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="likeCheckbox">
+                <label for="likeCheckbox">He dado like al video</label>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="subscribeCheckbox">
+                <label for="subscribeCheckbox">Me he suscrito al canal</label>
+            </div>
+            <div class="action-buttons">
+                <button id="continueBtn" class="action-btn" disabled>Continuar a la película</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movie Player Modal -->
     <div id="playerModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -138,64 +175,158 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('playerModal');
+            const youtubeModal = document.getElementById('youtubeModal');
+            const playerModal = document.getElementById('playerModal');
             const video = document.getElementById('video');
             const modalTitle = document.getElementById('modalMovieTitle');
             const closeBtn = document.querySelector('.close-modal');
             const playButtons = document.querySelectorAll('.play-btn');
+            const continueBtn = document.getElementById('continueBtn');
+            const likeCheckbox = document.getElementById('likeCheckbox');
+            const subscribeCheckbox = document.getElementById('subscribeCheckbox');
+            const countdownElement = document.getElementById('countdown');
+            
             let hls;
-
-            // Open modal and play video
+            let player;
+            let countdownTimer;
+            let currentVideoSrc = '';
+            let currentVideoTitle = '';
+            let hasVerified = false;
+            
+            // YouTube API callback
+            window.onYouTubeIframeAPIReady = function() {
+                player = new YT.Player('youtubePlayer', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: 'eLJewNB-kus', // El ID del video de YouTube
+                    playerVars: {
+                        'autoplay': 0,
+                        'controls': 1
+                    },
+                    events: {
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            };
+            
+            // YouTube player state change handler
+            function onPlayerStateChange(event) {
+                // If video starts playing
+                if (event.data == YT.PlayerState.PLAYING && !hasVerified) {
+                    // Start the countdown timer
+                    startCountdown();
+                }
+            }
+            
+            // Start countdown timer
+            function startCountdown() {
+                // Clear any existing timer
+                if (countdownTimer) clearInterval(countdownTimer);
+                
+                let timeLeft = 30;
+                countdownElement.textContent = timeLeft;
+                
+                countdownTimer = setInterval(function() {
+                    timeLeft--;
+                    countdownElement.textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownTimer);
+                        // Enable continue button if checkboxes are checked
+                        updateContinueButton();
+                    }
+                }, 1000);
+            }
+            
+            // Update continue button state
+            function updateContinueButton() {
+                const timerComplete = parseInt(countdownElement.textContent) <= 0;
+                continueBtn.disabled = !(timerComplete && likeCheckbox.checked && subscribeCheckbox.checked);
+            }
+            
+            // Checkboxes event listeners
+            likeCheckbox.addEventListener('change', updateContinueButton);
+            subscribeCheckbox.addEventListener('change', updateContinueButton);
+            
+            // Play button click handler
             playButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    const videoSrc = this.getAttribute('data-src');
-                    const title = this.getAttribute('data-title');
+                    currentVideoSrc = this.getAttribute('data-src');
+                    currentVideoTitle = this.getAttribute('data-title');
                     
-                    modalTitle.textContent = title;
-                    modal.style.display = 'block';
+                    // Show YouTube verification modal
+                    youtubeModal.style.display = 'block';
                     
-                    if (Hls.isSupported()) {
-                        if (hls) {
-                            hls.destroy();
-                        }
-                        
-                        hls = new Hls();
-                        hls.loadSource(videoSrc);
-                        hls.attachMedia(video);
-                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                            video.play();
-                        });
-                    } 
-                    // For browsers that support native HLS (Safari, iOS)
-                    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                        video.src = videoSrc;
-                        video.addEventListener('loadedmetadata', function() {
-                            video.play();
-                        });
+                    // Reset verification state
+                    hasVerified = false;
+                    likeCheckbox.checked = false;
+                    subscribeCheckbox.checked = false;
+                    countdownElement.textContent = '30';
+                    updateContinueButton();
+                    
+                    // If player exists, play the video
+                    if (player && typeof player.playVideo === 'function') {
+                        player.seekTo(0);
                     }
                 });
             });
-
-            // Close modal
+            
+            // Continue button click handler
+            continueBtn.addEventListener('click', function() {
+                // Hide YouTube modal
+                youtubeModal.style.display = 'none';
+                
+                // Set verification status
+                hasVerified = true;
+                
+                // Show movie player modal
+                playerModal.style.display = 'block';
+                modalTitle.textContent = currentVideoTitle;
+                
+                // Initialize video player
+                if (Hls.isSupported()) {
+                    if (hls) {
+                        hls.destroy();
+                    }
+                    
+                    hls = new Hls();
+                    hls.loadSource(currentVideoSrc);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        video.play();
+                    });
+                } 
+                // For browsers that support native HLS (Safari, iOS)
+                else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = currentVideoSrc;
+                    video.addEventListener('loadedmetadata', function() {
+                        video.play();
+                    });
+                }
+            });
+            
+            // Close movie player modal
             closeBtn.addEventListener('click', function() {
-                modal.style.display = 'none';
+                playerModal.style.display = 'none';
                 video.pause();
                 video.src = '';
                 if (hls) {
                     hls.destroy();
                 }
             });
-
+            
             // Close modal when clicking outside
             window.addEventListener('click', function(event) {
-                if (event.target == modal) {
-                    modal.style.display = 'none';
+                if (event.target == playerModal) {
+                    playerModal.style.display = 'none';
                     video.pause();
                     video.src = '';
                     if (hls) {
                         hls.destroy();
                     }
                 }
+                
+                // Don't close YouTube modal when clicking outside to prevent skipping verification
             });
         });
     </script>
