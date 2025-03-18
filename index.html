@@ -3,977 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor de Películas</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <title>Cinema Online</title>
     <style>
-        * {
-            box-sizing: border-box;
+        body {
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #0f0f0f;
+            color: white;
         }
-        
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+        .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 15px;
-            background-color: #141414;
-            color: #fff;
-            line-height: 1.5;
+            padding: 20px;
         }
-        
-        h1 {
+        header {
+            background-color: #111;
+            padding: 15px 0;
             text-align: center;
-            margin: 20px 0 30px;
-            font-size: 28px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
-        
-        .movies {
+        h1 {
+            color: #e50914;
+            margin: 0;
+        }
+        .movie-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
+            margin-top: 30px;
         }
-        
-        .movie {
-            background-color: #1f1f1f;
-            border-radius: 8px;
+        .movie-card {
+            background-color: #222;
+            border-radius: 5px;
             overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .movie:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-        }
-        
-        .movie img {
-            width: 100%;
-            height: 360px;
-            object-fit: cover;
-            transition: opacity 0.3s;
-        }
-        
-        .movie:hover img {
-            opacity: 0.9;
-        }
-        
-        .movie-info {
-            padding: 15px;
-        }
-        
-        h2 {
-            margin-top: 0;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .genres {
-            color: #999;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        
-        .synopsis {
-            font-size: 14px;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            color: #ccc;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .play-btn {
-            background: #e50914;
-            color: white;
-            border: none;
-            padding: 12px 15px;
-            border-radius: 4px;
+            transition: transform 0.3s;
             cursor: pointer;
+        }
+        .movie-card:hover {
+            transform: scale(1.05);
+        }
+        .movie-card img {
             width: 100%;
+            height: 280px;
+            object-fit: cover;
+        }
+        .movie-info {
+            padding: 10px;
+        }
+        .movie-title {
             font-weight: bold;
-            transition: background 0.3s, transform 0.1s;
-            font-size: 15px;
+            margin: 0 0 5px;
         }
-        
-        .play-btn:hover {
-            background: #f40612;
-        }
-        
-        .play-btn:active {
-            transform: scale(0.98);
-        }
-        
-        /* Player modal */
-        .modal {
-            display: none;
+        .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.92);
-            z-index: 999;
-            overflow-y: auto;
-        }
-        
-        .modal-content {
-            position: relative;
-            width: 95%;
-            max-width: 1000px;
-            margin: 3% auto;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .close-modal {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 10;
-            height: 40px;
-            width: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(0,0,0,0.5);
-            border-radius: 50%;
-            transition: background-color 0.3s;
-        }
-        
-        .close-modal:hover {
-            background-color: rgba(229,9,20,0.8);
-        }
-        
-        #videoPlayer {
-            width: 100%;
-            height: 0;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
-            position: relative;
-            background-color: #000;
-        }
-        
-        video {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        
-        .movie-details {
-            padding: 20px;
-            background-color: #1f1f1f;
-            border-radius: 0 0 8px 8px;
-        }
-        
-        .movie-title {
-            margin-top: 0;
-            font-size: 22px;
-        }
-        
-        /* Verification modal */
-        .verification-container {
-            position: relative;
-            width: 95%;
-            max-width: 800px;
-            margin: 3% auto;
-            background-color: #1f1f1f;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        
-        .verification-title {
-            color: #fff;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
-        .verification-message {
-            color: #ccc;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 16px;
-        }
-        
-        .player-container {
-            width: 100%;
-            background-color: #000;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        #youtubePlayer {
-            width: 100%;
-            aspect-ratio: 16/9;
-        }
-        
-        .timer-container {
-            background-color: #333;
-            border-radius: 30px;
-            height: 10px;
-            width: 100%;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-        
-        .timer-bar {
-            height: 100%;
-            width: 0;
-            background-color: #e50914;
-            border-radius: 30px;
-            transition: width 1s linear;
-        }
-        
-        .timer-text {
-            color: #e50914;
-            font-size: 18px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        
-        .verification-actions {
-            background-color: #252525;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-        
-        .verification-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .verification-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .verification-item .checkbox {
-            position: relative;
-            width: 24px;
-            height: 24px;
-            margin-right: 15px;
-            cursor: pointer;
-        }
-        
-        .verification-item .checkbox input {
-            opacity: 0;
-            position: absolute;
-            width: 0;
-            height: 0;
-        }
-        
-        .checkmark {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 24px;
-            width: 24px;
-            background-color: #333;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-        
-        .verification-item:hover .checkmark {
-            background-color: #444;
-        }
-        
-        .verification-item input:checked ~ .checkmark {
-            background-color: #e50914;
-        }
-        
-        .checkmark:after {
-            content: "";
-            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
             display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
         }
-        
-        .verification-item input:checked ~ .checkmark:after {
-            display: block;
+        .video-container {
+            width: 80%;
+            max-width: 800px;
         }
-        
-        .verification-item .checkmark:after {
-            left: 9px;
-            top: 5px;
-            width: 6px;
-            height: 12px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
-        
-        .verification-item label {
-            color: #ccc;
-            font-size: 16px;
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
             cursor: pointer;
         }
-        
+        .timer {
+            margin-top: 20px;
+            color: white;
+            font-size: 18px;
+        }
         .action-buttons {
-            display: flex;
-            justify-content: center;
             margin-top: 20px;
         }
-        
-        .action-btn {
-            background: #e50914;
+        .action-button {
+            background-color: #e50914;
             color: white;
             border: none;
-            padding: 14px 25px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s;
-            font-size: 16px;
-            min-width: 200px;
         }
-        
-        .action-btn:hover {
-            background: #f40612;
-            transform: translateY(-2px);
-        }
-        
-        .action-btn:active {
-            transform: translateY(0);
-        }
-        
-        .action-btn:disabled {
-            background: #5c5c5c;
+        .action-button:disabled {
+            background-color: #777;
             cursor: not-allowed;
-            transform: none;
         }
-        
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 24px;
-                margin: 15px 0 20px;
-            }
-            
-            .movies {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 15px;
-            }
-            
-            .movie img {
-                height: 230px;
-            }
-            
-            .movie-info {
-                padding: 10px;
-            }
-            
-            h2 {
-                font-size: 16px;
-            }
-            
-            .genres, .synopsis {
-                font-size: 13px;
-            }
-            
-            .synopsis {
-                -webkit-line-clamp: 2;
-            }
-            
-            .play-btn {
-                padding: 10px;
-                font-size: 14px;
-            }
-            
-            .modal-content, .verification-container {
-                width: 92%;
-                margin: 10% auto;
-            }
-            
-            .verification-title {
-                font-size: 20px;
-            }
-            
-            .verification-message {
-                font-size: 14px;
-            }
-            
-            .action-btn {
-                width: 100%;
-                padding: 12px 15px;
-            }
-        }
-        
-        /* Extra small devices */
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            h1 {
-                font-size: 22px;
-            }
-            
-            .movies {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 10px;
-            }
-            
-            .movie img {
-                height: 200px;
-            }
-            
-            .verification-item .checkbox {
-                width: 20px;
-                height: 20px;
-            }
-            
-            .checkmark {
-                height: 20px;
-                width: 20px;
-            }
-            
-            .verification-item .checkmark:after {
-                left: 7px;
-                top: 4px;
-                width: 5px;
-                height: 10px;
-            }
-            
-            .verification-item label {
-                font-size: 14px;
-            }
-        }
-
-        /* Loading spinner */
-        .loader {
+        .movie-player {
+            width: 100%;
             display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #e50914;
-            animation: spin 1s ease-in-out infinite;
-            z-index: 10;
-        }
-
-        @keyframes spin {
-            to { 
-                transform: translate(-50%, -50%) rotate(360deg); 
-            }
-        }
-
-        /* Fake YouTube buttons */
-        .youtube-controls {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-            gap: 20px;
-        }
-
-        .youtube-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #333;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .youtube-btn:hover {
-            background: #444;
-        }
-
-        .youtube-btn.active {
-            background: #e50914;
-        }
-
-        .youtube-btn svg {
-            width: 20px;
-            height: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Catálogo de Películas</h1>
-    <div class="movies">
-        <div class="movie">
-            <img src="/api/placeholder/640/360" alt="El jardinero">
-            <div class="movie-info">
-                <h2>El jardinero</h2>
-                <div class="genres">Acción, Comedia</div>
-                <div class="synopsis">Serge guarda un secreto de Estado. Él, su familia y el jardinero Leo aparecen en una lista negra del gobierno. Intentan idear un plan para seguir con vida.</div>
-                <button class="play-btn" data-src="https://r63hfpdmodtc.premilkyway.com/hls2/01/08878/rswfc6pc49w2_,l,n,.urlset/index-f2-v1-a1.m3u8?t=8UF1ZnVH15UHkCPDbplWFWANAP3b0I2nf_RcFwXx8l8&s=1742333573&e=129600&f=44390394&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" data-title="El jardinero">Reproducir</button>
-            </div>
-        </div>
+    <header>
+        <h1>CINEMA ONLINE</h1>
+    </header>
 
-        <div class="movie">
-            <img src="/api/placeholder/640/360" alt="Rumours">
-            <div class="movie-info">
-                <h2>Rumours</h2>
-                <div class="genres">Comedia, Terror</div>
-                <div class="synopsis">Los líderes de siete democracias mas ricas del mundo se pierden en un bosque, al tiempo que tratan de redactar una declaración sobre una crisis mundial.</div>
-                <button class="play-btn" data-src="https://vwyn3lxe5fv5.premilkyway.com/hls2/01/08878/bayv83mrmyw8_,l,n,h,.urlset/index-f3-v1-a1.m3u8?t=25RDRMFnBNeQXb2u42uceviXx4fP_GvYPHx6yAicsPI&s=1742333722&e=129600&f=44391615&srv=z13jtbat10fa85i&i=0.4&sp=500&p1=z13jtbat10fa85i&p2=z13jtbat10fa85i&asn=273133" data-title="Rumours">Reproducir</button>
+    <div class="container">
+        <div class="movie-grid">
+            <div class="movie-card" onclick="openMovie('Avatar', '/api/placeholder/500/750')">
+                <img src="/api/placeholder/200/300" alt="Avatar">
+                <div class="movie-info">
+                    <p class="movie-title">Avatar</p>
+                </div>
             </div>
-        </div>
-
-        <div class="movie">
-            <img src="/api/placeholder/640/360" alt="Ritual maldito">
-            <div class="movie-info">
-                <h2>Ritual maldito</h2>
-                <div class="genres">Terror, Suspenso</div>
-                <div class="synopsis">Un chico mudo se ve atrapado en su apartamento con un monstruo siniestro después de pedir un deseo.</div>
-                <button class="play-btn" data-src="https://cyyroro04xrqr.premilkyway.com/hls2/01/08701/uzqlw4eyr47a_,l,n,.urlset/index-f2-v1-a1.m3u8?t=neOpHHikOLJtzzpqIC9agu3FL-zD7qkxZhKogNx1WHM&s=1742334273&e=129600&f=43508853&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="Ritual maldito">Reproducir</button>
+            <div class="movie-card" onclick="openMovie('Avengers: Endgame', '/api/placeholder/500/750')">
+                <img src="/api/placeholder/200/300" alt="Avengers: Endgame">
+                <div class="movie-info">
+                    <p class="movie-title">Avengers: Endgame</p>
+                </div>
             </div>
-        </div>
-
-        <div class="movie">
-            <img src="/api/placeholder/640/360" alt="Una muerte antes de una boda">
-            <div class="movie-info">
-                <h2>Una muerte antes de una boda</h2>
-                <div class="genres">Comedia, Romance</div>
-                <div class="synopsis">Cuando Maja vuelve a casa con su prometido, sus tradicionales padres deben superar los prejuicios culturales.</div>
-                <button class="play-btn" data-src="https://bxs5xkxkyi4y.premilkyway.com/hls2/01/08701/fh3gwmmnlqt3_,l,n,h,.urlset/index-f1-v1-a1.m3u8?t=nBAWwMChbobpFIK0lhwALI0XeLO-9lITcHtenDDg_ik&s=1742334388&e=129600&f=43507826&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="Una muerte antes de una boda">Reproducir</button>
+            <div class="movie-card" onclick="openMovie('The Dark Knight', '/api/placeholder/500/750')">
+                <img src="/api/placeholder/200/300" alt="The Dark Knight">
+                <div class="movie-info">
+                    <p class="movie-title">The Dark Knight</p>
+                </div>
             </div>
-        </div>
-
-        <div class="movie">
-            <img src="/api/placeholder/640/360" alt="El hilo rojo">
-            <div class="movie-info">
-                <h2>El hilo rojo</h2>
-                <div class="genres">Drama, Romance</div>
-                <div class="synopsis">Abril, una azafata rebelde y audaz, y Manuel, un tímido y tradicional empresario, se conocen en un avión.</div>
-                <button class="play-btn" data-src="https://m5qilv3g2l.premilkyway.com/hls2/01/08701/tspdeoz4ejv9_,l,n,.urlset/index-f2-v1-a1.m3u8?t=ivaFiDFUy0p3pT-CRgwwy_uyeQuQADD-cL-SP2DXeFo&s=1742334557&e=129600&f=43507735&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="El hilo rojo">Reproducir</button>
+            <div class="movie-card" onclick="openMovie('Pulp Fiction', '/api/placeholder/500/750')">
+                <img src="/api/placeholder/200/300" alt="Pulp Fiction">
+                <div class="movie-info">
+                    <p class="movie-title">Pulp Fiction</p>
+                </div>
             </div>
-        </div>
-
-        <div class="movie">
-            <img src="/api/placeholder/640/360" alt="El caos está en el aire">
-            <div class="movie-info">
-                <h2>El caos está en el aire</h2>
-                <div class="genres">Romance, Comedia, Drama</div>
-                <div class="synopsis">Una pareja de Estocolmo planea casarse en la isla de Gotlandia, pero las tradiciones impuestas por sus familias convierten el día en un desastre.</div>
-                <button class="play-btn" data-src="https://m5qilv3g2l.premilkyway.com/hls2/01/08701/0mvx39w6f4yu_,l,n,.urlset/index-f2-v1-a1.m3u8?t=j6dydoy5EsxlDsU0gSdotI5sJkJrgIuIIBjgHXGRlxI&s=1742334691&e=129600&f=43506053&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" data-title="El caos está en el aire">Reproducir</button>
+            <div class="movie-card" onclick="openMovie('Jurassic Park', '/api/placeholder/500/750')">
+                <img src="/api/placeholder/200/300" alt="Jurassic Park">
+                <div class="movie-info">
+                    <p class="movie-title">Jurassic Park</p>
+                </div>
             </div>
-        </div>
-
-        <div class="movie">
-            <img src="/api/placeholder/640/360" alt="Salva el Mundo">
-            <div class="movie-info">
-                <h2>Salva el Mundo</h2>
-                <div class="genres">Comedia, Acción</div>
-                <div class="synopsis">El mundo está en peligro. Mou, el super agente más especial tiene que salvarlo, Luna una enigmática sicaria llena de flow intentará detenerlo.</div>
-                <button class="play-btn" data-src="https://27u55xdzmm9q.premilkyway.com/hls2/01/08701/oe4wsfbmz913_,l,n,.urlset/index-f2-v1-a1.m3u8?t=qg2kuce-EYoMSD5tgqfhOE4z_qipuR9lRV6gppepf4c&s=1742334856&e=129600&f=43505108&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" data-title="Salva el Mundo">Reproducir</button>
-            </div>
-        </div>
-
-        <div class="movie">
-            <img src="/api/placeholder/640/360" alt="La ausencia del Edén">
-            <div class="movie-info">
-                <h2>La ausencia del Edén</h2>
-                <div class="genres">Suspenso, Drama, Romance, Crimen</div>
-                <div class="synopsis">Un agente del ICE y una mujer indocumentada se cruzan y trabajan juntos para salvar la vida de una niña inocente.</div>
-                <button class="play-btn" data-src="https://e9ccawf5esyyffhp.premilkyway.com/hls2/01/08700/b8vxmw0dsjbo_,l,n,.urlset/index-f2-v1-a1.m3u8?t=Y9vEileJAdIlZtkSim7J29oEwhmev-4yKUoYnMjHrcY&s=1742335158&e=129600&f=43504197&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133" data-title="La ausencia del Edén">Reproducir</button>
+            <div class="movie-card" onclick="openMovie('Titanic', '/api/placeholder/500/750')">
+                <img src="/api/placeholder/200/300" alt="Titanic">
+                <div class="movie-info">
+                    <p class="movie-title">Titanic</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Verification Modal -->
-    <div id="verificationModal" class="modal">
-        <div class="verification-container">
-            <h3 class="verification-title">¡Ver película gratis!</h3>
-            <div class="verification-message">Para ver la película, necesitas completar estos sencillos pasos:</div>
-            
-            <div class="player-container">
-                <div id="youtubePlayer"></div>
-                <div class="loader" id="videoLoader"></div>
-            </div>
-            
-            <div class="youtube-controls">
-                <button id="likeButton" class="youtube-btn">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"></path>
-                    </svg>
-                    Me gusta
-                </button>
-                <button id="subscribeButton" class="youtube-btn">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20 8H4V6h16v2zm-2-6H6v2h12V2zm4 10v8c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2v-8c0-1.1.9-2 2-2h16c1.1 0 2 .9 2 2zm-6 4l-6-3.27v6.53L16 16z"></path>
-                    </svg>
-                    Suscribirse
-                </button>
-            </div>
-            
-            <div class="timer-container">
-                <div class="timer-bar" id="timerBar"></div>
-            </div>
-            <div class="timer-text">Tiempo restante: <span id="countdown">30</span> segundos</div>
-            
-            <div class="verification-actions">
-                <div class="verification-item">
-                    <label class="checkbox">
-                        <input type="checkbox" id="likeCheckbox">
-                        <span class="checkmark"></span>
-                    </label>
-                    <label for="likeCheckbox">He dado like al video</label>
-                </div>
-                <div class="verification-item">
-                    <label class="checkbox">
-                        <input type="checkbox" id="subscribeCheckbox">
-                        <span class="checkmark"></span>
-                    </label>
-                    <label for="subscribeCheckbox">Me he suscrito al canal</label>
-                </div>
-            </div>
-            
+    <div id="overlay" class="overlay">
+        <span class="close-btn" onclick="closeOverlay()">&times;</span>
+        <div class="video-container">
+            <iframe id="youtubePlayer" width="100%" height="450" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div id="timer" class="timer">Por favor, mira este video por 30 segundos</div>
             <div class="action-buttons">
-                <button id="continueBtn" class="action-btn" disabled>Continuar a la película</button>
+                <button id="likeBtn" class="action-button" onclick="confirmLike()">He dado LIKE</button>
+                <button id="subscribeBtn" class="action-button" onclick="confirmSubscribe()">Me he SUSCRITO</button>
+                <button id="watchMovieBtn" class="action-button" disabled>Ver Película</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Movie Player Modal -->
-    <div id="playerModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div id="videoPlayer">
-                <video id="video" controls></video>
-                <div class="loader" id="playerLoader"></div>
-            </div>
-            <div class="movie-details">
-                <h3 id="modalMovieTitle" class="movie-title">Título de la película</h3>
+            <div id="moviePlayer" class="movie-player">
+                <img id="movieImage" src="" alt="Movie Poster" style="width:100%;">
+                <h2 id="movieTitle"></h2>
+                <p>¡Disfruta de tu película!</p>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const verificationModal = document.getElementById('verificationModal');
-            const playerModal = document.getElementById('playerModal');
-            const video = document.getElementById('video');
-            const modalTitle = document.getElementById('modalMovieTitle');
-            const closeBtn = document.querySelector('.close-modal');
-            const playButtons = document.querySelectorAll('.play-btn');
-            const continueBtn = document.getElementById('continueBtn');
-            const likeCheckbox = document.getElementById('likeCheckbox');
-            const subscribeCheckbox = document.getElementById('subscribeCheckbox');
-            const countdownElement = document.getElementById('countdown');
-            const timerBar = document.getElementById('timerBar');
-            const likeButton = document.getElementById('likeButton');
-            const subscribeButton = document.getElementById('subscribeButton');
-            const videoLoader = document.getElementById('videoLoader');
-            const playerLoader = document.getElementById('playerLoader');
-            
-            let hls;
-            let player;
-            let countdownTimer;
-            let currentVideoSrc = '';
-            let currentVideoTitle = '';
-            let hasVerified = false;
-            
-            // YouTube API callback
-            window.onYouTubeIframeAPIReady = function() {
-                player = new YT.Player('youtubePlayer', {
-                    height: '100%',
-                    width: '100%',
-                    videoId: 'dQw4w9WgXcQ', // Un video popular para la verificación
-                    playerVars: {
-                        'autoplay': 0,
-                        'controls': 1,
-                        'playsinline': 1,
-                        'modestbranding': 1,
-                        'rel': 0
-                    },
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange
-                    }
-                });
-            };
-            
-            // When YouTube player is ready
-            function onPlayerReady(event) {
-                videoLoader.style.display = 'none';
-            }
-            
-            // YouTube player state change handler
-            function onPlayerStateChange(event) {
-                // If video starts playing
-                if (event.data == YT.PlayerState.PLAYING && !hasVerified) {
-                    // Start the countdown timer
-                    startCountdown();
-                }
-            }
-            
-            // Like button click handler
-            likeButton.addEventListener('click', function() {
-                this.classList.toggle('active');
-                likeCheckbox.checked = this.classList.contains('active');
-                updateContinueButton();
-            });
-            
-            // Subscribe button click handler
-            subscribeButton.addEventListener('click', function() {
-                this.classList.toggle('active');
-                subscribeCheckbox.checked = this.classList.contains('active');
-                updateContinueButton();
-            });
-            
-           // Start countdown timer
-            function startCountdown() {
-                let timeLeft = 30;
-                
-                countdownTimer = setInterval(function() {
-                    timeLeft--;
-                    countdownElement.textContent = timeLeft;
-                    timerBar.style.width = ((30 - timeLeft) / 30 * 100) + '%';
-                    
-                    if (timeLeft <= 0) {
-                        clearInterval(countdownTimer);
-                        countdownElement.textContent = '0';
-                        timerBar.style.width = '100%';
-                        hasVerified = true;
-                        
-                        // Enable the continue button regardless of checkbox state after timer completes
-                        continueBtn.disabled = false;
-                    }
-                }, 1000);
-            }
-            
-            // Update continue button state
-            function updateContinueButton() {
-                if (hasVerified || (likeCheckbox.checked && subscribeCheckbox.checked)) {
-                    continueBtn.disabled = false;
-                } else {
-                    continueBtn.disabled = true;
-                }
-            }
-            
-            // Checkbox event listeners
-            likeCheckbox.addEventListener('change', updateContinueButton);
-            subscribeCheckbox.addEventListener('change', updateContinueButton);
-            
-            // Play button click handler
-            playButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    currentVideoSrc = this.getAttribute('data-src');
-                    currentVideoTitle = this.getAttribute('data-title');
-                    
-                    // Show verification modal first if not already verified
-                    if (!hasVerified) {
-                        verificationModal.style.display = 'block';
-                    } else {
-                        showPlayerModal();
-                    }
-                });
-            });
-            
-            // Continue button click handler
-            continueBtn.addEventListener('click', function() {
-                verificationModal.style.display = 'none';
-                showPlayerModal();
-            });
-            
-            // Show player modal and initialize video
-            function showPlayerModal() {
-                playerModal.style.display = 'block';
-                modalTitle.textContent = currentVideoTitle;
-                playerLoader.style.display = 'block';
-                
-                // Clean up any existing HLS instance
-                if (hls && hls.media) {
-                    hls.destroy();
-                }
-                
-                // Check if HLS.js is supported
-                if (Hls.isSupported()) {
-                    hls = new Hls();
-                    hls.loadSource(currentVideoSrc);
-                    hls.attachMedia(video);
-                    
-                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        playerLoader.style.display = 'none';
-                        video.play();
-                    });
-                    
-                    hls.on(Hls.Events.ERROR, function(event, data) {
-                        if (data.fatal) {
-                            console.error('HLS error:', data);
-                            playerLoader.style.display = 'none';
-                            alert('Error al cargar el video. Por favor, inténtalo de nuevo más tarde.');
-                        }
-                    });
-                }
-                // For browsers that natively support HLS (Safari)
-                else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = currentVideoSrc;
-                    video.addEventListener('loadedmetadata', function() {
-                        playerLoader.style.display = 'none';
-                        video.play();
-                    });
-                    video.addEventListener('error', function() {
-                        playerLoader.style.display = 'none';
-                        alert('Error al cargar el video. Por favor, inténtalo de nuevo más tarde.');
-                    });
-                } else {
-                    alert('Tu navegador no soporta la reproducción de este video.');
-                    playerLoader.style.display = 'none';
-                }
-            }
-            
-            // Close modal button handler
-            closeBtn.addEventListener('click', function() {
-                playerModal.style.display = 'none';
-                
-                // Pause video
-                if (video.pause) {
-                    video.pause();
-                }
-                
-                // Clean up HLS if needed
-                if (hls && hls.media) {
-                    hls.destroy();
-                }
-            });
-            
-            // Close modal when clicking outside the content
-            window.addEventListener('click', function(event) {
-                if (event.target == playerModal) {
-                    playerModal.style.display = 'none';
-                    
-                    // Pause video
-                    if (video.pause) {
-                        video.pause();
-                    }
-                    
-                    // Clean up HLS if needed
-                    if (hls && hls.media) {
-                        hls.destroy();
-                    }
-                }
-                
-                if (event.target == verificationModal) {
-                    verificationModal.style.display = 'none';
-                    
-                    // Stop YouTube video if playing
-                    if (player && typeof player.pauseVideo === 'function') {
-                        player.pauseVideo();
-                    }
-                    
-                    // Clear countdown timer
-                    if (countdownTimer) {
-                        clearInterval(countdownTimer);
-                    }
-                }
-            });
-            
-            // Handle video errors
-            video.addEventListener('error', function() {
-                playerLoader.style.display = 'none';
-                alert('Error al reproducir el video. Por favor, inténtalo de nuevo más tarde.');
-            });
-        });
+        let currentMovie = '';
+        let currentPoster = '';
+        let likeConfirmed = false;
+        let subscribeConfirmed = false;
+        let timeLeft = 30;
+        let timerId;
 
-        // Handle keyboard events for accessibility
-            document.addEventListener('keydown', function(event) {
-                // Close modals when ESC key is pressed
-                if (event.key === 'Escape') {
-                    if (playerModal.style.display === 'block') {
-                        playerModal.style.display = 'none';
-                        if (video.pause) {
-                            video.pause();
-                        }
-                        if (hls && hls.media) {
-                            hls.destroy();
-                        }
-                    }
-                    
-                    if (verificationModal.style.display === 'block') {
-                        verificationModal.style.display = 'none';
-                        if (player && typeof player.pauseVideo === 'function') {
-                            player.pauseVideo();
-                        }
-                        if (countdownTimer) {
-                            clearInterval(countdownTimer);
-                        }
-                    }
-                }
-            });
+        function openMovie(title, poster) {
+            currentMovie = title;
+            currentPoster = poster;
+            document.getElementById('overlay').style.display = 'flex';
+            document.getElementById('youtubePlayer').src = 'https://www.youtube.com/embed/eLJewNB-kus?autoplay=1';
+            document.getElementById('moviePlayer').style.display = 'none';
             
-            // Reset verification status if revisiting page
-            function resetVerification() {
-                if (countdownTimer) {
-                    clearInterval(countdownTimer);
-                }
-                
-                hasVerified = false;
-                likeCheckbox.checked = false;
-                subscribeCheckbox.checked = false;
-                likeButton.classList.remove('active');
-                subscribeButton.classList.remove('active');
-                countdownElement.textContent = '30';
-                timerBar.style.width = '0%';
-                continueBtn.disabled = true;
-                
-                if (player && typeof player.seekTo === 'function') {
-                    player.seekTo(0);
-                    player.pauseVideo();
-                }
+            // Reset states
+            likeConfirmed = false;
+            subscribeConfirmed = false;
+            document.getElementById('likeBtn').disabled = false;
+            document.getElementById('subscribeBtn').disabled = false;
+            document.getElementById('watchMovieBtn').disabled = true;
+            
+            // Start timer
+            timeLeft = 30;
+            updateTimerDisplay();
+            timerId = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            updateTimerDisplay();
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                document.getElementById('timer').textContent = '¡Ya puedes confirmar que te has suscrito y has dado like!';
             }
-            
-            // Add preconnect and preload hints for performance
-            function addResourceHints() {
-                const hints = [
-                    { rel: 'preconnect', href: 'https://premilkyway.com' },
-                    { rel: 'preconnect', href: 'https://cdnjs.cloudflare.com' },
-                    { rel: 'preconnect', href: 'https://www.youtube.com' }
-                ];
-                
-                hints.forEach(hint => {
-                    const link = document.createElement('link');
-                    link.rel = hint.rel;
-                    link.href = hint.href;
-                    document.head.appendChild(link);
-                });
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Por favor, mira este video por ${timeLeft} segundos más`;
+        }
+
+        function confirmLike() {
+            likeConfirmed = true;
+            document.getElementById('likeBtn').disabled = true;
+            document.getElementById('likeBtn').textContent = '✓ Like Confirmado';
+            checkAllConfirmed();
+        }
+
+        function confirmSubscribe() {
+            subscribeConfirmed = true;
+            document.getElementById('subscribeBtn').disabled = true;
+            document.getElementById('subscribeBtn').textContent = '✓ Suscripción Confirmada';
+            checkAllConfirmed();
+        }
+
+        function checkAllConfirmed() {
+            if (likeConfirmed && subscribeConfirmed && timeLeft <= 0) {
+                document.getElementById('watchMovieBtn').disabled = false;
+                document.getElementById('watchMovieBtn').onclick = showMovie;
             }
+        }
+
+        function showMovie() {
+            document.getElementById('youtubePlayer').src = '';
+            document.getElementById('timer').style.display = 'none';
+            document.getElementById('likeBtn').style.display = 'none';
+            document.getElementById('subscribeBtn').style.display = 'none';
+            document.getElementById('watchMovieBtn').style.display = 'none';
             
-            // Initialize resource hints
-            addResourceHints();
-            
-            // Handle page visibility changes
-            document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'hidden') {
-                    // Pause video when switching tabs
-                    if (video.pause && !video.paused) {
-                        video.pause();
-                    }
-                    
-                    if (player && typeof player.getPlayerState === 'function' && 
-                        player.getPlayerState() === YT.PlayerState.PLAYING) {
-                        player.pauseVideo();
-                    }
-                }
-            });
-            
-            // Enforce HTTPS for security
-            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                window.location.href = window.location.href.replace('http:', 'https:');
-            }
-        });
+            document.getElementById('moviePlayer').style.display = 'block';
+            document.getElementById('movieImage').src = currentPoster;
+            document.getElementById('movieTitle').textContent = currentMovie;
+        }
+
+        function closeOverlay() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('youtubePlayer').src = '';
+            clearInterval(timerId);
+        }
     </script>
 </body>
 </html>
