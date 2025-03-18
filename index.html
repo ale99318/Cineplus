@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Videos</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 800px; margin: auto; }
+        .dropdown { margin: 10px; }
+        .catalogo { display: flex; flex-wrap: wrap; justify-content: center; }
+        .item { margin: 10px; cursor: pointer; }
+        .item img { width: 150px; height: 220px; }
+        #videoContainer { display: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Catálogo de Videos</h1>
+    <div class="container">
+        <select id="categoria" class="dropdown">
+            <option value="">Selecciona una categoría</option>
+            <option value="peliculas">Películas</option>
+            <option value="series">Series</option>
+        </select>
+        
+        <select id="genero" class="dropdown" style="display: none;"></select>
+        
+        <div id="catalogo" class="catalogo"></div>
+        
+        <div id="videoContainer">
+            <h2 id="videoTitulo"></h2>
+            <iframe id="videoFrame" width="560" height="315" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+    
+    <script>
+        const data = {
+            peliculas: {
+                "Acción": [
+                    { titulo: "Película 1", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", video: "https://yhqd4yg264.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/index-v1-a1.m3u8?t=lrorYmOTTWRgtQ9ipn1Gi5uhOp8hIYWeMikUglmswi4&s=1742312294&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" },
+                    { titulo: "Película 2", imagen: "URL_IMAGEN", video: "URL_VIDEO" }
+                ],
+                "Drama": [
+                    { titulo: "Película 3", imagen: "URL_IMAGEN", video: "URL_VIDEO" }
+                ]
+            },
+            series: {
+                "Comedia": [
+                    { titulo: "Serie 1", imagen: "URL_IMAGEN", video: "URL_VIDEO" }
+                ],
+                "Terror": [
+                    { titulo: "Serie 2", imagen: "URL_IMAGEN", video: "URL_VIDEO" }
+                ]
+            }
+        };
+        
+        document.getElementById("categoria").addEventListener("change", function() {
+            const generoSelect = document.getElementById("genero");
+            const catalogoDiv = document.getElementById("catalogo");
+            catalogoDiv.innerHTML = "";
+            
+            if (this.value) {
+                generoSelect.innerHTML = "<option value=''>Selecciona un género</option>";
+                for (let genero in data[this.value]) {
+                    let option = document.createElement("option");
+                    option.value = genero;
+                    option.textContent = genero;
+                    generoSelect.appendChild(option);
+                }
+                generoSelect.style.display = "block";
+            } else {
+                generoSelect.style.display = "none";
+            }
+        });
+        
+        document.getElementById("genero").addEventListener("change", function() {
+            const categoria = document.getElementById("categoria").value;
+            const catalogoDiv = document.getElementById("catalogo");
+            catalogoDiv.innerHTML = "";
+            
+            if (this.value) {
+                data[categoria][this.value].forEach(item => {
+                    let div = document.createElement("div");
+                    div.classList.add("item");
+                    div.innerHTML = `<img src="${item.imagen}" alt="${item.titulo}"><p>${item.titulo}</p>`;
+                    div.addEventListener("click", () => mostrarVideo(item));
+                    catalogoDiv.appendChild(div);
+                });
+            }
+        });
+        
+        function mostrarVideo(item) {
+            document.getElementById("videoTitulo").textContent = item.titulo;
+            document.getElementById("videoFrame").src = item.video;
+            document.getElementById("videoContainer").style.display = "block";
+        }
+    </script>
+</body>
+</html>
