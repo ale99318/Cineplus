@@ -21,7 +21,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            position: relative; /* Para control de posicionamiento */
+            position: relative;
         }
         .dropdown { 
             padding: 8px 15px;
@@ -62,13 +62,13 @@
             background-color: #252525;
             padding: 15px;
             border-radius: 8px;
-            z-index: 5; /* Asegura que esté por encima de otros elementos */
-            position: relative; /* Para control de posicionamiento */
+            z-index: 5;
+            position: relative;
         }
         #videoPlayer {
             max-width: 100%;
             border-radius: 4px;
-            z-index: 6; /* Asegura que el video siempre sea visible */
+            z-index: 6;
         }
         .error-message {
             color: #ff5555;
@@ -85,7 +85,7 @@
             border-radius: 8px;
             text-align: left;
             display: none;
-            position: relative; /* Para control de posicionamiento */
+            position: relative;
             z-index: 5;
         }
         .sinopsis-container h3 {
@@ -132,7 +132,7 @@
             top: 50%;
             transform: translateY(-50%);
             right: 20px;
-            z-index: 2; /* Menor que el contenido principal */
+            z-index: 2;
         }
         .footer-ad {
             margin-top: 30px;
@@ -153,8 +153,8 @@
         .sticky-ad {
             position: sticky;
             top: 10px;
-            z-index: 1; /* Asegura que esté por debajo del contenido principal */
-            margin-bottom: 20px; /* Espacio para no tapar el contenido */
+            z-index: 1;
+            margin-bottom: 20px;
         }
         /* Estilos para el botón de cerrar anuncio flotante */
         .close-side-ad {
@@ -186,9 +186,70 @@
             height: 2px;
             background-color: #333;
         }
+        /* Estilos para el modal de YouTube */
+        #youtubeModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 1000;
+            overflow: auto;
+        }
+        .youtube-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+        }
+        .youtube-container iframe {
+            width: 100%;
+            height: 450px;
+            border: none;
+        }
+        .close-youtube {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .youtube-text {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn-like {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+    <!-- Modal para YouTube -->
+    <div id="youtubeModal">
+        <div class="youtube-container">
+            <span class="close-youtube" onclick="closeYoutubeModal()">&times;</span>
+            <iframe id="youtubePlayer" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div class="youtube-text">
+                <p>Para continuar viendo nuestro contenido, por favor da like al video y suscríbete a nuestro canal.</p>
+                <button class="btn-like" onclick="videoLiked()">¡He dado like y me he suscrito!</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Anuncio superior -->
     <div class="ad-container ad-highlight">
         <div class="ad-label">Publicidad</div>
@@ -212,15 +273,6 @@
             <option value="peliculas">Películas</option>
             <option value="series">Series</option>
         </select>
-        
-        <select id="genero" class="dropdown" style="display: none;"></select>
-        
-        <!-- Anuncio después de los selectores pero con altura controlada -->
-        <div class="ad-container" style="max-height: 120px; overflow: hidden;">
-            <div class="ad-label">Publicidad</div>
-            <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
-            <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
-        </div>
         
         <div id="catalogo" class="catalogo"></div>
         
@@ -306,115 +358,125 @@
     </div>
     
     <script>
-        // Datos de ejemplo con sinopsis
+        // Datos de ejemplo con sinopsis simplificado a solo Películas y Series
         const data = {
-            peliculas: {
-                "Acción": [
-                    { 
-                        titulo: "Deadpool & Wolverine", 
-                        imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", 
-                        video: "https://yhqd4yg264.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/iframes-v1-a1.m3u8?t=lrorYmOTTWRgtQ9ipn1Gi5uhOp8hIYWeMikUglmswi4&s=1742312294&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133",
-                        sinopsis: "Deadpool deberá convencer a un Wolverine retirado para que regrese a la acción y salve el futuro multiversal. Juntos, estos dos antihéroes emprenderán un viaje épico que cambiará para siempre la cronología del MCU."
-                    },
-                    { 
-                        "titulo": "El Jardinero",
-            "imagen": "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Fx9SrxVaRhBNKf95vns1ti13yzl0.jpg&w=640&q=75",
-            "video": "https://r63hfpdmodtc.premilkyway.com/hls2/01/08878/rswfc6pc49w2_,l,n,.urlset/index-f2-v1-a1.m3u8?t=8UF1ZnVH15UHkCPDbplWFWANAP3b0I2nf_RcFwXx8l8&s=1742333573&e=129600&f=44390394&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133",
-            "sinopsis": "Serge guarda un secreto de Estado. Él, su familia y el jardinero Leo aparecen en una lista negra del gobierno. Intentan idear un plan para seguir con vida.",
-            "genero": "Acción, Comedia",
-            "actores": "Jean-Claude Van Damme, Michaël Youn, Nawell Madani, Carla Poquin, Jérôme Le Banner, Ragnar Le Breton, Kaaris, Studio Danielle, Élie Semoun, Vincent Desagnat, Arthur Lombard, Arthur Aspaturian, Rayan Bouazza, Solal Charhon, Léo Wazzoler"
-                    }
-                
-                ],
-                "Drama": [
-                    { 
-                        titulo: "El Padrino", 
-                        imagen: "https://cuevana.biz/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", 
-                        video: "https://mx9skjnui4es.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/index-v1-a1.m3u8?t=69SPoqxIDY8iDKMBrje4nLfXAkpQQPoZasCka7y8FZA&s=1742313222&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133",
-                        sinopsis: "Sigue la historia del cardenal Lawrence, un hombre que tiene la tarea de dirigir un proceso encubierto para la elección de un nuevo Papa.
-
-Genero: Drama, Misterio, Suspenso
-Actores: Ralph Fiennes, Stanley Tucci, John Lithgow, Isabella Rossellini, Lucian Msamati, Carlos Diehz, Sergio Castellitto, Brían F. O'Byrne, Merab Ninidze, Thomas Loibl, Jacek Koman, Bruno Novelli, Rony Kramer, Valerio Da Silva, Joseph Mydell"
-                    }
-                ],
-"Comedia": [
-        {
-            "titulo": "Rumours",
-            "imagen": "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Fa7Ijn4fEnYjGl45OoyxBOnFy7Hc.jpg&w=640&q=75",
-            "video": "https://vwyn3lxe5fv5.premilkyway.com/hls2/01/08878/bayv83mrmyw8_,l,n,h,.urlset/index-f3-v1-a1.m3u8?t=25RDRMFnBNeQXb2u42uceviXx4fP_GvYPHx6yAicsPI&s=1742333722&e=129600&f=44391615&srv=z13jtbat10fa85i&i=0.4&sp=500&p1=z13jtbat10fa85i&p2=z13jtbat10fa85i&asn=273133",
-            "sinopsis": "Los líderes de siete democracias más ricas del mundo se pierden en un bosque, al tiempo que tratan de redactar una declaración sobre una crisis mundial, enfrentándose a peligros mientras intentan encontrar la salida.",
-            "genero": "Comedia, Terror",
-            "actores": "Cate Blanchett, Roy Dupuis, Nikki Amuka-Bird, Charles Dance, 平岳大, Denis Ménochet, Rolando Ravello, Zlatko Burić, Alicia Vikander, Alexa Kennedy, Tomi Kosynus, Ádám Bot, Viktória Dányi, Vivien Ferencz, Dorina Mayer"
-        }
-    ]
-                
-            },
-            series: {
-                "Comedia": [
-                    { 
-                        titulo: "Friends", 
-                        imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FbQ1fuCUJOuJgzK2NvZhj315xZX9.jpg&w=640&q=75", 
-                        video: "https://example.com/video4.m3u8",
-                        sinopsis: "Las aventuras y desventuras de seis amigos que viven en Manhattan. Rachel, Monica, Phoebe, Joey, Chandler y Ross conforman este grupo de inseparables amigos que viven en Nueva York y comparten su día a día."
-                    }
-                ],
-                "Terror": [
-                    { 
-                        titulo: "Stranger Things", 
-                        imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FvrfGm3HLsVUK9zUUMkuPf1kPc3c.jpg&w=640&q=75", 
-                        video: "https://example.com/video5.m3u8",
-                        sinopsis: "Cuando un niño desaparece en un pequeño pueblo, sus amigos, familiares y la policía se ven envueltos en una serie de eventos misteriosos al tratar de encontrarlo. Sus investigaciones les conducen a un extraño experimento secreto del gobierno y a una niña con poderes extraordinarios."
-                    }
-                ]
-            }
+            peliculas: [
+                { 
+                    titulo: "Deadpool & Wolverine", 
+                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", 
+                    video: "https://yhqd4yg264.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/iframes-v1-a1.m3u8?t=lrorYmOTTWRgtQ9ipn1Gi5uhOp8hIYWeMikUglmswi4&s=1742312294&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133",
+                    sinopsis: "Deadpool deberá convencer a un Wolverine retirado para que regrese a la acción y salve el futuro multiversal. Juntos, estos dos antihéroes emprenderán un viaje épico que cambiará para siempre la cronología del MCU.",
+                    genero: "Acción"
+                },
+                { 
+                    titulo: "El Jardinero",
+                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Fx9SrxVaRhBNKf95vns1ti13yzl0.jpg&w=640&q=75",
+                    video: "https://r63hfpdmodtc.premilkyway.com/hls2/01/08878/rswfc6pc49w2_,l,n,.urlset/index-f2-v1-a1.m3u8?t=8UF1ZnVH15UHkCPDbplWFWANAP3b0I2nf_RcFwXx8l8&s=1742333573&e=129600&f=44390394&srv=3FjgDmcnea8S35m&i=0.4&sp=500&p1=3FjgDmcnea8S35m&p2=3FjgDmcnea8S35m&asn=273133",
+                    sinopsis: "Serge guarda un secreto de Estado. Él, su familia y el jardinero Leo aparecen en una lista negra del gobierno. Intentan idear un plan para seguir con vida.",
+                    genero: "Acción"
+                },
+                { 
+                    titulo: "El Padrino", 
+                    imagen: "https://cuevana.biz/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", 
+                    video: "https://mx9skjnui4es.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/index-v1-a1.m3u8?t=69SPoqxIDY8iDKMBrje4nLfXAkpQQPoZasCka7y8FZA&s=1742313222&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133",
+                    sinopsis: "Sigue la historia del cardenal Lawrence, un hombre que tiene la tarea de dirigir un proceso encubierto para la elección de un nuevo Papa.",
+                    genero: "Drama"
+                },
+                {
+                    titulo: "Rumours",
+                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2Fa7Ijn4fEnYjGl45OoyxBOnFy7Hc.jpg&w=640&q=75",
+                    video: "https://vwyn3lxe5fv5.premilkyway.com/hls2/01/08878/bayv83mrmyw8_,l,n,h,.urlset/index-f3-v1-a1.m3u8?t=25RDRMFnBNeQXb2u42uceviXx4fP_GvYPHx6yAicsPI&s=1742333722&e=129600&f=44391615&srv=z13jtbat10fa85i&i=0.4&sp=500&p1=z13jtbat10fa85i&p2=z13jtbat10fa85i&asn=273133",
+                    sinopsis: "Los líderes de siete democracias más ricas del mundo se pierden en un bosque, al tiempo que tratan de redactar una declaración sobre una crisis mundial, enfrentándose a peligros mientras intentan encontrar la salida.",
+                    genero: "Comedia"
+                }
+            ],
+            series: [
+                { 
+                    titulo: "Friends", 
+                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FbQ1fuCUJOuJgzK2NvZhj315xZX9.jpg&w=640&q=75", 
+                    video: "https://example.com/video4.m3u8",
+                    sinopsis: "Las aventuras y desventuras de seis amigos que viven en Manhattan. Rachel, Monica, Phoebe, Joey, Chandler y Ross conforman este grupo de inseparables amigos que viven en Nueva York y comparten su día a día.",
+                    genero: "Comedia"
+                },
+                { 
+                    titulo: "Stranger Things", 
+                    imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FvrfGm3HLsVUK9zUUMkuPf1kPc3c.jpg&w=640&q=75", 
+                    video: "https://example.com/video5.m3u8",
+                    sinopsis: "Cuando un niño desaparece en un pequeño pueblo, sus amigos, familiares y la policía se ven envueltos en una serie de eventos misteriosos al tratar de encontrarlo. Sus investigaciones les conducen a un extraño experimento secreto del gobierno y a una niña con poderes extraordinarios.",
+                    genero: "Terror"
+                }
+            ]
         };
         
         // Variables globales para el item seleccionado
         let selectedItem = null;
+        let hasAdBlocker = false;
+        let watchedYoutubeVideo = false;
         
         // Inicializar eventos
         document.addEventListener('DOMContentLoaded', function() {
             initializeEventListeners();
-            
-            // Cargar anuncios adicionales después de la carga de la página
-            loadAdditionalAds();
+            checkForAdBlocker();
         });
-        
-        // Función para cargar anuncios adicionales
-        function loadAdditionalAds() {
-            // Script para el contenedor de anuncios personalizado
-            const script = document.createElement('script');
-            script.async = true;
-            script.type = 'text/javascript';
-            script.src = '//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js';
-            document.body.appendChild(script);
+
+        // Función para comprobar si hay un bloqueador de anuncios
+        function checkForAdBlocker() {
+            const testAd = document.createElement('div');
+            testAd.innerHTML = '&nbsp;';
+            testAd.className = 'adsbox';
+            document.body.appendChild(testAd);
+            
+            setTimeout(function() {
+                if (testAd.offsetHeight === 0) {
+                    hasAdBlocker = true;
+                    console.log("Bloqueador de anuncios detectado");
+                }
+                document.body.removeChild(testAd);
+            }, 100);
         }
         
         // Configurar escuchadores de eventos
         function initializeEventListeners() {
             document.getElementById("categoria").addEventListener("change", handleCategoryChange);
-            document.getElementById("genero").addEventListener("change", handleGenreChange);
             document.getElementById("btnCerrarSinopsis").addEventListener("click", cerrarSinopsis);
             document.getElementById("btnVerVideo").addEventListener("click", reproducirVideoSeleccionado);
+        }
+        
+        // Abrir modal de YouTube
+        function openYoutubeModal() {
+            const modal = document.getElementById("youtubeModal");
+            const youtubePlayer = document.getElementById("youtubePlayer");
             
-            // Hacer que los anuncios sean cliqueables
-            const adContainers = document.querySelectorAll('.ad-container');
-            adContainers.forEach(container => {
-                container.addEventListener('click', function(e) {
-                    // Evitar que se propague el clic si es en un iframe o en el botón de cerrar
-                    if (e.target.tagName !== 'IFRAME' && !e.target.classList.contains('close-side-ad')) {
-                        const adLinks = this.querySelectorAll('a');
-                        if (adLinks.length > 0) {
-                            adLinks[0].click();
-                        }
-                    }
-                });
-            });
+            // Establecer la URL del video de YouTube
+            youtubePlayer.src = "https://www.youtube.com/embed/eLJewNB-kus?autoplay=1";
+            
+            modal.style.display = "block";
+        }
+        
+        // Cerrar modal de YouTube
+        function closeYoutubeModal() {
+            const modal = document.getElementById("youtubeModal");
+            const youtubePlayer = document.getElementById("youtubePlayer");
+            
+            // Detener el video de YouTube
+            youtubePlayer.src = "";
+            
+            modal.style.display = "none";
+        }
+        
+        // Marcar el video como visto cuando el usuario da like
+        function videoLiked() {
+            watchedYoutubeVideo = true;
+            closeYoutubeModal();
+            
+            // Si hay un elemento seleccionado, continuar con la reproducción
+            if (selectedItem) {
+                mostrarVideo(selectedItem);
+            }
         }
         
         // Manejar cambio de categoría
         function handleCategoryChange() {
-            const generoSelect = document.getElementById("genero");
             const catalogoDiv = document.getElementById("catalogo");
             const videoContainer = document.getElementById("videoContainer");
             const sinopsisContainer = document.getElementById("sinopsisContainer");
@@ -424,71 +486,19 @@ Actores: Ralph Fiennes, Stanley Tucci, John Lithgow, Isabella Rossellini, Lucian
             sinopsisContainer.style.display = "none";
             
             if (this.value) {
-                generoSelect.innerHTML = "<option value=''>Selecciona un género</option>";
-                for (let genero in data[this.value]) {
-                    let option = document.createElement("option");
-                    option.value = genero;
-                    option.textContent = genero;
-                    generoSelect.appendChild(option);
-                }
-                generoSelect.style.display = "block";
-                
-                // Mostrar un anuncio cuando cambia la categoría
-                mostrarAnuncioAleatorio();
-            } else {
-                generoSelect.style.display = "none";
-            }
-        }
-        
-        // Mostrar un anuncio aleatorio entre los items
-        function mostrarAnuncioAleatorio() {
-            // Se implementará si se desea insertar anuncios entre los items del catálogo
-        }
-        
-        // Manejar cambio de género
-        function handleGenreChange() {
-            const categoria = document.getElementById("categoria").value;
-            const catalogoDiv = document.getElementById("catalogo");
-            catalogoDiv.innerHTML = "";
-            
-            if (this.value) {
-                data[categoria][this.value].forEach((item, index) => {
+                // Ahora no hay subcategorías, mostramos todos los elementos directamente
+                data[this.value].forEach((item, index) => {
                     let div = document.createElement("div");
                     div.classList.add("item");
                     div.innerHTML = `
                         <img src="${item.imagen}" alt="${item.titulo}" 
-                             onerror="this.src='https://via.placeholder.com/150x220?text=Sin+Imagen'">
+                             onerror="this.src='/api/placeholder/150/220?text=Sin+Imagen'">
                         <p>${item.titulo}</p>
                     `;
                     div.addEventListener("click", () => mostrarSinopsis(item));
                     catalogoDiv.appendChild(div);
-                    
-                    // Insertar anuncio después de ciertos items
-                    if (index === 1) {
-                        insertarAnuncioEnCatalogo(catalogoDiv);
-                    }
                 });
             }
-        }
-        
-        // Insertar anuncio en el catálogo
-        function insertarAnuncioEnCatalogo(catalogoDiv) {
-            const adDiv = document.createElement("div");
-            adDiv.className = "ad-container";
-            adDiv.style.width = "100%";
-            adDiv.style.margin = "10px 0";
-            adDiv.style.maxHeight = "100px"; // Controlar altura
-            adDiv.style.overflow = "hidden"; // Evitar desbordamiento
-            adDiv.innerHTML = `
-                <div class="ad-label">Publicidad</div>
-            `;
-            catalogoDiv.appendChild(adDiv);
-            
-            // Ejecutar el script del anuncio
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = '//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js';
-            adDiv.appendChild(script);
         }
         
         // Mostrar sinopsis
@@ -521,7 +531,12 @@ Actores: Ralph Fiennes, Stanley Tucci, John Lithgow, Isabella Rossellini, Lucian
         // Reproducir video del item seleccionado
         function reproducirVideoSeleccionado() {
             if (selectedItem) {
-                mostrarVideo(selectedItem);
+                // Si tiene bloqueador de anuncios y no ha visto el video de YouTube, mostrar el video
+                if (hasAdBlocker && !watchedYoutubeVideo) {
+                    openYoutubeModal();
+                } else {
+                    mostrarVideo(selectedItem);
+                }
                 cerrarSinopsis();
             }
         }
