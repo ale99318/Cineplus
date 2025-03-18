@@ -4,20 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Videos</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.10"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .container { max-width: 800px; margin: auto; }
-        .dropdown { margin: 10px; }
-        .catalogo { display: flex; flex-wrap: wrap; justify-content: center; }
-        .item { margin: 10px; cursor: pointer; }
-        .item img { width: 150px; height: 220px; }
-        #videoContainer { display: none; margin-top: 20px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .dropdown { 
+            padding: 8px 15px;
+            margin: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .catalogo { 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .item { 
+            margin: 5px; 
+            cursor: pointer; 
+            transition: transform 0.3s;
+            width: 160px;
+        }
+        .item:hover {
+            transform: scale(1.05);
+        }
+        .item img { 
+            width: 150px; 
+            height: 220px; 
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        #videoContainer { 
+            display: none; 
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        #videoPlayer {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+        h1 {
+            color: #333;
+        }
     </style>
 </head>
 <body>
-    <h1>Catálogo de Videos</h1>
     <div class="container">
+        <h1>Catálogo de Videos</h1>
+        
         <select id="categoria" class="dropdown">
             <option value="">Selecciona una categoría</option>
             <option value="peliculas">Películas</option>
@@ -30,35 +86,54 @@
         
         <div id="videoContainer">
             <h2 id="videoTitulo"></h2>
-            <video id="videoPlayer" width="560" height="315" controls></video>
+            <video id="videoPlayer" width="800" height="450" controls></video>
+            <div id="errorMessage" class="error-message">
+                No se pudo cargar el video. Por favor intenta nuevamente más tarde.
+            </div>
         </div>
     </div>
     
     <script>
+        // Datos de ejemplo
         const data = {
             peliculas: {
                 "Acción": [
-                    { titulo: "Película 1", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", video: "https://yhqd4yg264.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/iframes-v1-a1.m3u8?t=lrorYmOTTWRgtQ9ipn1Gi5uhOp8hIYWeMikUglmswi4&s=1742312294&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" },
-                    { titulo: "Película 2", imagen: "URL_IMAGEN", video: "URL_VIDEO" }
+                    { titulo: "Deadpool & Wolverine", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", video: "https://yhqd4yg264.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/iframes-v1-a1.m3u8?t=lrorYmOTTWRgtQ9ipn1Gi5uhOp8hIYWeMikUglmswi4&s=1742312294&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" },
+                    { titulo: "El Reino del Planeta de los Simios", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FzMvtEvWqZnNfDDOczIuR5ZSKPpB.jpg&w=640&q=75", video: "https://example.com/video2.m3u8" }
                 ],
                 "Drama": [
-                    { titulo: "Película 3", imagen: "URL_IMAGEN", video: "URL_VIDEO" }
+                    { titulo: "El Padrino", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FwLXd1Iwf7bBo1UAY9doQvhUeGwK.jpg&w=640&q=75", video: "https://example.com/video3.m3u8" }
                 ]
             },
             series: {
                 "Comedia": [
-                    { titulo: "Serie 1", imagen: "URL_IMAGEN", video: "URL_VIDEO" }
+                    { titulo: "Friends", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FbQ1fuCUJOuJgzK2NvZhj315xZX9.jpg&w=640&q=75", video: "https://example.com/video4.m3u8" }
                 ],
                 "Terror": [
-                    { titulo: "Serie 2", imagen: "URL_IMAGEN", video: "URL_VIDEO" }
+                    { titulo: "Stranger Things", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FvrfGm3HLsVUK9zUUMkuPf1kPc3c.jpg&w=640&q=75", video: "https://example.com/video5.m3u8" }
                 ]
             }
         };
         
-        document.getElementById("categoria").addEventListener("change", function() {
+        // Inicializar eventos
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+        });
+        
+        // Configurar escuchadores de eventos
+        function initializeEventListeners() {
+            document.getElementById("categoria").addEventListener("change", handleCategoryChange);
+            document.getElementById("genero").addEventListener("change", handleGenreChange);
+        }
+        
+        // Manejar cambio de categoría
+        function handleCategoryChange() {
             const generoSelect = document.getElementById("genero");
             const catalogoDiv = document.getElementById("catalogo");
+            const videoContainer = document.getElementById("videoContainer");
+            
             catalogoDiv.innerHTML = "";
+            videoContainer.style.display = "none";
             
             if (this.value) {
                 generoSelect.innerHTML = "<option value=''>Selecciona un género</option>";
@@ -72,9 +147,10 @@
             } else {
                 generoSelect.style.display = "none";
             }
-        });
+        }
         
-        document.getElementById("genero").addEventListener("change", function() {
+        // Manejar cambio de género
+        function handleGenreChange() {
             const categoria = document.getElementById("categoria").value;
             const catalogoDiv = document.getElementById("catalogo");
             catalogoDiv.innerHTML = "";
@@ -83,26 +159,82 @@
                 data[categoria][this.value].forEach(item => {
                     let div = document.createElement("div");
                     div.classList.add("item");
-                    div.innerHTML = `<img src="${item.imagen}" alt="${item.titulo}"><p>${item.titulo}</p>`;
+                    div.innerHTML = `
+                        <img src="${item.imagen}" alt="${item.titulo}" 
+                             onerror="this.src='https://via.placeholder.com/150x220?text=Sin+Imagen'">
+                        <p>${item.titulo}</p>
+                    `;
                     div.addEventListener("click", () => mostrarVideo(item));
                     catalogoDiv.appendChild(div);
                 });
             }
-        });
+        }
         
+        // Mostrar video
         function mostrarVideo(item) {
-            document.getElementById("videoTitulo").textContent = item.titulo;
+            const videoTitulo = document.getElementById("videoTitulo");
             const video = document.getElementById("videoPlayer");
+            const videoContainer = document.getElementById("videoContainer");
+            const errorMessage = document.getElementById("errorMessage");
             
+            videoTitulo.textContent = item.titulo;
+            errorMessage.style.display = "none";
+            
+            // Detener cualquier reproducción anterior
+            if (video.hls) {
+                video.hls.destroy();
+                video.hls = null;
+            }
+            video.src = "";
+            
+            // Inicializar HLS
             if (Hls.isSupported()) {
-                const hls = new Hls();
+                const hls = new Hls({
+                    maxBufferLength: 30,
+                    maxBufferSize: 10 * 1000 * 1000, // 10MB
+                    debug: false
+                });
+                
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        console.error('Error fatal HLS:', data);
+                        errorMessage.style.display = "block";
+                        hls.destroy();
+                    }
+                });
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play().catch(e => {
+                        console.warn('Reproducción automática bloqueada:', e);
+                    });
+                });
+                
                 hls.loadSource(item.video);
                 hls.attachMedia(video);
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.hls = hls;
+            } 
+            else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = item.video;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play().catch(e => {
+                        console.warn('Reproducción automática bloqueada:', e);
+                    });
+                });
+                video.addEventListener('error', function() {
+                    errorMessage.style.display = "block";
+                });
+            } 
+            else {
+                errorMessage.textContent = "Tu navegador no soporta la reproducción de videos HLS.";
+                errorMessage.style.display = "block";
+                return;
             }
             
-            document.getElementById("videoContainer").style.display = "block";
+            videoContainer.style.display = "block";
+            window.scrollTo({
+                top: videoContainer.offsetTop,
+                behavior: 'smooth'
+            });
         }
     </script>
 </body>
