@@ -94,9 +94,96 @@
             cursor: pointer;
             margin-top: 10px;
         }
+        /* Estilos para los anuncios */
+        .ad-container {
+            margin: 20px auto;
+            background-color: #252525;
+            padding: 5px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            cursor: pointer;
+        }
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(0,0,0,0.5);
+            color: #fff;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .ad-banner {
+            width: 100%;
+            text-align: center;
+            margin: 0 auto;
+            display: block;
+        }
+        .side-ad {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 20px;
+            z-index: 100;
+        }
+        .footer-ad {
+            margin-top: 30px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #252525;
+        }
+        /* Hacer que los anuncios sean más llamativos */
+        .ad-highlight {
+            animation: pulse 2s infinite;
+            border: 2px solid #4CAF50;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+        .sticky-ad {
+            position: sticky;
+            top: 10px;
+            z-index: 99;
+        }
+        /* Estilos para el botón de cerrar anuncio flotante */
+        .close-side-ad {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
+    <!-- Anuncio superior -->
+    <div class="ad-container ad-highlight">
+        <div class="ad-label">Publicidad</div>
+        <script type="text/javascript">
+            atOptions = {
+                'key' : 'b330ccd204185aee9ef640adccf896d2',
+                'format' : 'iframe',
+                'height' : 90,
+                'width' : 728,
+                'params' : {}
+            };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js"></script>
+    </div>
+
     <div class="container">
         <h1>Catálogo de Videos</h1>
         
@@ -108,6 +195,13 @@
         
         <select id="genero" class="dropdown" style="display: none;"></select>
         
+        <!-- Anuncio después de los selectores -->
+        <div class="ad-container sticky-ad">
+            <div class="ad-label">Publicidad</div>
+            <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
+            <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+        </div>
+        
         <div id="catalogo" class="catalogo"></div>
         
         <div id="sinopsisContainer" class="sinopsis-container">
@@ -115,14 +209,68 @@
             <p id="sinopsisTexto"></p>
             <button id="btnCerrarSinopsis" class="btn-cerrar">Cerrar</button>
             <button id="btnVerVideo" class="btn-cerrar" style="background-color: #4CAF50; margin-left: 10px;">Ver video</button>
+            
+            <!-- Anuncio dentro del contenedor de sinopsis -->
+            <div class="ad-container" style="margin-top: 15px;">
+                <div class="ad-label">Publicidad</div>
+                <script type="text/javascript">
+                    atOptions = {
+                        'key' : 'a55c7cdc78df0520f71c2b00e4046167',
+                        'format' : 'iframe',
+                        'height' : 300,
+                        'width' : 160,
+                        'params' : {}
+                    };
+                </script>
+                <script type="text/javascript" src="//www.highperformanceformat.com/a55c7cdc78df0520f71c2b00e4046167/invoke.js"></script>
+            </div>
         </div>
         
         <div id="videoContainer">
             <h2 id="videoTitulo"></h2>
+            
+            <!-- Anuncio antes del video -->
+            <div class="ad-container ad-highlight">
+                <div class="ad-label">Publicidad</div>
+                <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
+            </div>
+            
             <video id="videoPlayer" width="800" height="450" controls></video>
             <div id="errorMessage" class="error-message">
                 No se pudo cargar el video. Por favor intenta nuevamente más tarde.
             </div>
+            
+            <!-- Anuncio después del video -->
+            <div class="ad-container" style="margin-top: 15px;">
+                <div class="ad-label">Publicidad</div>
+                <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+            </div>
+        </div>
+        
+        <!-- Anuncio en el pie de página -->
+        <div class="footer-ad ad-highlight">
+            <div class="ad-label">Publicidad</div>
+            <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank" rel="noopener">
+                <img src="/api/placeholder/728/90" alt="Publicidad" style="max-width: 100%;">
+            </a>
+        </div>
+    </div>
+    
+    <!-- Anuncio lateral flotante -->
+    <div id="sideAd" class="side-ad">
+        <button class="close-side-ad" onclick="document.getElementById('sideAd').style.display='none'">×</button>
+        <div class="ad-container">
+            <div class="ad-label">Publicidad</div>
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : 'a55c7cdc78df0520f71c2b00e4046167',
+                    'format' : 'iframe',
+                    'height' : 300,
+                    'width' : 160,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="//www.highperformanceformat.com/a55c7cdc78df0520f71c2b00e4046167/invoke.js"></script>
         </div>
     </div>
     
@@ -179,7 +327,20 @@
         // Inicializar eventos
         document.addEventListener('DOMContentLoaded', function() {
             initializeEventListeners();
+            
+            // Cargar anuncios adicionales después de la carga de la página
+            loadAdditionalAds();
         });
+        
+        // Función para cargar anuncios adicionales
+        function loadAdditionalAds() {
+            // Script para el contenedor de anuncios personalizado
+            const script = document.createElement('script');
+            script.async = true;
+            script.type = 'text/javascript';
+            script.src = '//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js';
+            document.body.appendChild(script);
+        }
         
         // Configurar escuchadores de eventos
         function initializeEventListeners() {
@@ -187,6 +348,20 @@
             document.getElementById("genero").addEventListener("change", handleGenreChange);
             document.getElementById("btnCerrarSinopsis").addEventListener("click", cerrarSinopsis);
             document.getElementById("btnVerVideo").addEventListener("click", reproducirVideoSeleccionado);
+            
+            // Hacer que los anuncios sean cliqueables
+            const adContainers = document.querySelectorAll('.ad-container');
+            adContainers.forEach(container => {
+                container.addEventListener('click', function(e) {
+                    // Evitar que se propague el clic si es en un iframe o en el botón de cerrar
+                    if (e.target.tagName !== 'IFRAME' && !e.target.classList.contains('close-side-ad')) {
+                        const adLinks = this.querySelectorAll('a');
+                        if (adLinks.length > 0) {
+                            adLinks[0].click();
+                        }
+                    }
+                });
+            });
         }
         
         // Manejar cambio de categoría
@@ -209,9 +384,17 @@
                     generoSelect.appendChild(option);
                 }
                 generoSelect.style.display = "block";
+                
+                // Mostrar un anuncio cuando cambia la categoría
+                mostrarAnuncioAleatorio();
             } else {
                 generoSelect.style.display = "none";
             }
+        }
+        
+        // Mostrar un anuncio aleatorio entre los items
+        function mostrarAnuncioAleatorio() {
+            // Se implementará si se desea insertar anuncios entre los items del catálogo
         }
         
         // Manejar cambio de género
@@ -221,7 +404,7 @@
             catalogoDiv.innerHTML = "";
             
             if (this.value) {
-                data[categoria][this.value].forEach(item => {
+                data[categoria][this.value].forEach((item, index) => {
                     let div = document.createElement("div");
                     div.classList.add("item");
                     div.innerHTML = `
@@ -231,8 +414,31 @@
                     `;
                     div.addEventListener("click", () => mostrarSinopsis(item));
                     catalogoDiv.appendChild(div);
+                    
+                    // Insertar anuncio después de ciertos items
+                    if (index === 1) {
+                        insertarAnuncioEnCatalogo(catalogoDiv);
+                    }
                 });
             }
+        }
+        
+        // Insertar anuncio en el catálogo
+        function insertarAnuncioEnCatalogo(catalogoDiv) {
+            const adDiv = document.createElement("div");
+            adDiv.className = "ad-container ad-highlight";
+            adDiv.style.width = "100%";
+            adDiv.style.margin = "10px 0";
+            adDiv.innerHTML = `
+                <div class="ad-label">Publicidad</div>
+            `;
+            catalogoDiv.appendChild(adDiv);
+            
+            // Ejecutar el script del anuncio
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = '//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js';
+            adDiv.appendChild(script);
         }
         
         // Mostrar sinopsis
