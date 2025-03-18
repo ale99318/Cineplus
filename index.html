@@ -235,6 +235,19 @@
             margin-top: 15px;
             font-size: 16px;
         }
+        /* Placeholder para anuncios bloqueados */
+        .ad-placeholder {
+            width: 100%;
+            height: 90px;
+            background-color: #252525;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -250,19 +263,10 @@
         </div>
     </div>
 
-    <!-- Anuncio superior -->
+    <!-- Anuncio superior con fallback -->
     <div class="ad-container ad-highlight">
         <div class="ad-label">Publicidad</div>
-        <script type="text/javascript">
-            atOptions = {
-                'key' : 'b330ccd204185aee9ef640adccf896d2',
-                'format' : 'iframe',
-                'height' : 90,
-                'width' : 728,
-                'params' : {}
-            };
-        </script>
-        <script type="text/javascript" src="//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js"></script>
+        <div class="ad-placeholder">Espacio reservado para publicidad</div>
     </div>
 
     <div class="container">
@@ -282,30 +286,21 @@
             <button id="btnCerrarSinopsis" class="btn-cerrar">Cerrar</button>
             <button id="btnVerVideo" class="btn-cerrar" style="background-color: #4CAF50; margin-left: 10px;">Ver video</button>
             
-            <!-- Anuncio dentro del contenedor de sinopsis, posicionado después de los botones -->
+            <!-- Anuncio dentro del contenedor de sinopsis con fallback -->
             <div class="ad-container" style="margin-top: 15px;">
                 <div class="ad-label">Publicidad</div>
-                <script type="text/javascript">
-                    atOptions = {
-                        'key' : 'a55c7cdc78df0520f71c2b00e4046167',
-                        'format' : 'iframe',
-                        'height' : 300,
-                        'width' : 160,
-                        'params' : {}
-                    };
-                </script>
-                <script type="text/javascript" src="//www.highperformanceformat.com/a55c7cdc78df0520f71c2b00e4046167/invoke.js"></script>
+                <div class="ad-placeholder">Espacio reservado para publicidad</div>
             </div>
         </div>
         
         <div id="videoContainer">
             <h2 id="videoTitulo"></h2>
             
-            <!-- Anuncio antes del video con espacio suficiente -->
+            <!-- Anuncio antes del video con fallback -->
             <div class="video-ad">
                 <div class="ad-container">
                     <div class="ad-label">Publicidad</div>
-                    <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
+                    <div class="ad-placeholder">Espacio reservado para publicidad</div>
                 </div>
             </div>
             
@@ -321,39 +316,28 @@
             
             <div class="video-separator"></div>
             
-            <!-- Anuncio después del video con espacio suficiente -->
+            <!-- Anuncio después del video con fallback -->
             <div class="video-ad">
                 <div class="ad-container">
                     <div class="ad-label">Publicidad</div>
-                    <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+                    <div class="ad-placeholder">Espacio reservado para publicidad</div>
                 </div>
             </div>
         </div>
         
-        <!-- Anuncio en el pie de página -->
+        <!-- Anuncio en el pie de página con fallback -->
         <div class="footer-ad">
             <div class="ad-label">Publicidad</div>
-            <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank" rel="noopener">
-                <img src="/api/placeholder/728/90" alt="Publicidad" style="max-width: 100%;">
-            </a>
+            <div class="ad-placeholder">Espacio reservado para publicidad</div>
         </div>
     </div>
     
-    <!-- Anuncio lateral flotante movido más a la derecha y con opción para cerrarlo -->
+    <!-- Anuncio lateral flotante con fallback -->
     <div id="sideAd" class="side-ad" style="right: 10px;">
         <button class="close-side-ad" onclick="document.getElementById('sideAd').style.display='none'">×</button>
         <div class="ad-container">
             <div class="ad-label">Publicidad</div>
-            <script type="text/javascript">
-                atOptions = {
-                    'key' : 'a55c7cdc78df0520f71c2b00e4046167',
-                    'format' : 'iframe',
-                    'height' : 300,
-                    'width' : 160,
-                    'params' : {}
-                };
-            </script>
-            <script type="text/javascript" src="//www.highperformanceformat.com/a55c7cdc78df0520f71c2b00e4046167/invoke.js"></script>
+            <div class="ad-placeholder">Espacio reservado para publicidad</div>
         </div>
     </div>
     
@@ -417,9 +401,39 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeEventListeners();
             checkForAdBlocker();
+            handleExtensionErrors();
         });
 
-        // Función para comprobar si hay un bloqueador de anuncios
+        // Función para manejar errores de extensiones
+        function handleExtensionErrors() {
+            // Añadir objeto bg para evitar errores de extensiones
+            if (typeof window.bg === 'undefined') {
+                window.bg = {
+                    // Métodos stub para evitar errores
+                    onCompleted: function() {},
+                    // Añadir otros métodos que puedan estar siendo llamados por las extensiones
+                    getRules: function() { return []; },
+                    getTypes: function() { return []; },
+                    addListener: function() {},
+                    removeListener: function() {}
+                };
+            }
+            
+            // Método para tratar de interceptar errores de extensiones
+            window.addEventListener('error', function(e) {
+                if (e.message && (
+                    e.message.includes('window.bg') || 
+                    e.message.includes('Cannot read properties of undefined')
+                )) {
+                    console.log('Interceptado error de extensión:', e.message);
+                    e.preventDefault();
+                    return true;
+                }
+                return false;
+            }, true);
+        }
+
+        // Función mejorada para comprobar si hay un bloqueador de anuncios
         function checkForAdBlocker() {
             const testAd = document.createElement('div');
             testAd.innerHTML = '&nbsp;';
@@ -430,9 +444,25 @@
                 if (testAd.offsetHeight === 0) {
                     hasAdBlocker = true;
                     console.log("Bloqueador de anuncios detectado");
+                    // Mostrar los placeholders para anuncios
+                    showAdPlaceholders();
                 }
                 document.body.removeChild(testAd);
             }, 100);
+        }
+        
+        // Mostrar placeholders para anuncios bloqueados
+        function showAdPlaceholders() {
+            const adContainers = document.querySelectorAll('.ad-container');
+            adContainers.forEach(container => {
+                // Asegurarse de que el contenedor tenga un placeholder
+                if (!container.querySelector('.ad-placeholder')) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'ad-placeholder';
+                    placeholder.textContent = 'Espacio reservado para publicidad';
+                    container.appendChild(placeholder);
+                }
+            });
         }
         
         // Configurar escuchadores de eventos
@@ -541,7 +571,7 @@
             }
         }
         
-        // Mostrar video
+        // Mostrar video con tratamiento mejorado de errores
         function mostrarVideo(item) {
             const videoTitulo = document.getElementById("videoTitulo");
             const video = document.getElementById("videoPlayer");
@@ -556,71 +586,134 @@
             
             // Detener cualquier reproducción anterior
             if (video.hls) {
-                video.hls.destroy();
+                try {
+                    video.hls.destroy();
+                } catch (e) {
+                    console.log("Error al destruir HLS:", e);
+                }
                 video.hls = null;
             }
             video.src = "";
             
-            // Inicializar HLS
-            if (Hls.isSupported()) {
-                const hls = new Hls({
-                    maxBufferLength: 30,
-                    maxBufferSize: 10 * 1000 * 1000, // 10MB
-                    debug: false
-                });
-                
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    if (data.fatal) {
-                        console.error('Error fatal HLS:', data);
-                        errorMessage.style.display = "block";
-                        hls.destroy();
-                    }
-                });
-                
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play().catch(e => {
-                        console.warn('Reproducción automática bloqueada:', e);
-                    });
-                });
-                
-                hls.loadSource(item.video);
-                hls.attachMedia(video);
-                video.hls = hls;
-            } 
-            else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = item.video;
-                video.addEventListener('loadedmetadata', function() {
-                    video.play().catch(e => {
-                        console.warn('Reproducción automática bloqueada:', e);
-                    });
-                });
-                video.addEventListener('error', function() {
-                    errorMessage.style.display = "block";
-                });
-            } 
-            else {
-                errorMessage.textContent = "Tu navegador no soporta la reproducción de videos HLS.";
+            // Verificar que HLS esté correctamente cargado
+            if (typeof Hls === 'undefined') {
+                errorMessage.textContent = "Error: No se pudo cargar la librería HLS. Refresca la página o intenta más tarde.";
                 errorMessage.style.display = "block";
                 return;
             }
             
-            videoContainer.style.display = "block";
-            
-            // Ocultar temporalmente el anuncio lateral para asegurar visibilidad del video
-            const sideAd = document.getElementById("sideAd");
-            if (sideAd) {
-                sideAd.style.display = "none";
-                // Volver a mostrar después de 5 segundos, cuando el usuario ya está viendo el video
-                setTimeout(() => {
-                    sideAd.style.display = "block";
-                }, 5000);
-            }
-            
-            window.scrollTo({
-                top: videoContainer.offsetTop,
-                behavior: 'smooth'
-            });
-        }
+            // Inicializar HLS con manejo de errores mejorado
+            if (Hls.isSupported()) {
+                try {
+                    const hls = new Hls({
+                        maxBufferLength: 30,
+                        maxBufferSize: 10 * 1000 * 1000, // 10MB
+                        debug: false,
+                        xhrSetup: function(xhr, url) {
+                            // Añadir retry para peticiones fallidas
+                            xhr.retryCount = 0;
+                            xhr.maxRetries = 3;
+                            xhr.onreadystatechange = function() {
+                                if (xhr.readyState === 4 && xhr.status >= 500 && xhr.retryCount < xhr.maxRetries) {
+                                    xhr.retryCount++;
+                                    setTimeout(function() {
+                                        console.log(`Reintentando petición (${xhr.retryCount}/${xhr.maxRetries})...`);
+                                        xhr.open('GET', url, true);
+                                        xhr.send();
+                                    }, 1000 * xhr.retryCount); // Backoff exponencial
+                                }
+                            };
+                        }
+                    });
+                    
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        console.log("Error HLS:", data.type, data.details);
+                        if (data.fatal) {
+                            switch(data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    // Intentar recuperarse de errores de red
+                                    console.log("Error de red fatal, intentando recuperar...");
+                                    hls.startLoad();
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    console.log("Error de media fatal, intentando recuperar...");
+                                    hls.recoverMediaError();
+                                    break;
+                                default:
+                                    // Error no recuperable
+                                    console.error('Error fatal HLS:', data);
+                                    errorMessage.textContent = `Error al cargar el video: ${data.details}`;
+                                    errorMessage.style.display = "block";
+                                    hls.destroy();
+                                    break;
+                            }
+                        }
+                    });
+                    
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        video.play().catch(e => {
+                            console.warn('Reproducción automática bloqueada:', e);
+                            // Mostrar un mensaje al usuario
+                            const playButton = document.createElement('button');
+                            playButton.textContent = "Reproducir Video";
+                           playButton.style.cssText = "position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; padding: 10px 15px; background-color: #e63946; color: white; border: none; border-radius: 4px; cursor: pointer;";
+playButton.onclick = function() {
+    video.play().catch(e => console.error('Error al reproducir:', e));
+    this.remove();
+};
+video.parentNode.style.position = 'relative';
+video.parentNode.appendChild(playButton);
+
+// Asegurarnos de que la URL del video esté completa y sea válida
+const videoUrl = item.video || '';
+if (!videoUrl || videoUrl === 'https://example.com/video4.m3u8' || videoUrl === 'https://example.com/video5.m3u8') {
+    errorMessage.textContent = "Este video aún no está disponible. Por favor, intenta con otro contenido.";
+    errorMessage.style.display = "block";
+    return;
+}
+
+// Cargar la URL en HLS
+hls.loadSource(videoUrl);
+hls.attachMedia(video);
+video.hls = hls; // Guardar referencia para limpiar después
+
+// Mostrar el contenedor de video
+videoContainer.style.display = "block";
+
+// Desplazarse al reproductor
+window.scrollTo({
+    top: videoContainer.offsetTop - 20,
+    behavior: 'smooth'
+});
+
+} catch (error) {
+    console.error("Error al inicializar HLS:", error);
+    errorMessage.textContent = "Error al inicializar el reproductor. Por favor, recarga la página e intenta nuevamente.";
+    errorMessage.style.display = "block";
+}
+} 
+// Navegadores que soportan HLS nativamente (Safari)
+else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    try {
+        video.src = item.video;
+        video.addEventListener('loadedmetadata', function() {
+            video.play();
+        });
+        video.addEventListener('error', function() {
+            errorMessage.textContent = "Error al cargar el video. Por favor intenta nuevamente más tarde.";
+            errorMessage.style.display = "block";
+        });
+        videoContainer.style.display = "block";
+    } catch (e) {
+        console.error("Error en reproducción nativa:", e);
+        errorMessage.textContent = "Error al reproducir el video.";
+        errorMessage.style.display = "block";
+    }
+} else {
+    errorMessage.textContent = "Tu navegador no es compatible con la reproducción de este video.";
+    errorMessage.style.display = "block";
+}
+}
     </script>
 </body>
 </html>
