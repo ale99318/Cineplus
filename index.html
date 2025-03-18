@@ -9,23 +9,26 @@
         body { 
             font-family: Arial, sans-serif; 
             text-align: center;
-            background-color: #f5f5f5;
+            background-color: #121212;
             margin: 0;
             padding: 20px;
+            color: #e0e0e0;
         }
         .container { 
             max-width: 1000px; 
             margin: auto;
-            background-color: white;
+            background-color: #1e1e1e;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
         .dropdown { 
             padding: 8px 15px;
             margin: 10px;
             border-radius: 4px;
-            border: 1px solid #ccc;
+            border: 1px solid #444;
+            background-color: #252525;
+            color: #e0e0e0;
         }
         .catalogo { 
             display: flex; 
@@ -47,12 +50,15 @@
             width: 150px; 
             height: 220px; 
             border-radius: 6px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .item p {
+            margin: 5px 0;
         }
         #videoContainer { 
             display: none; 
             margin-top: 30px;
-            background-color: #f9f9f9;
+            background-color: #252525;
             padding: 15px;
             border-radius: 8px;
         }
@@ -61,12 +67,32 @@
             border-radius: 4px;
         }
         .error-message {
-            color: red;
+            color: #ff5555;
             margin-top: 10px;
             display: none;
         }
-        h1 {
-            color: #333;
+        h1, h2 {
+            color: #e0e0e0;
+        }
+        .sinopsis-container {
+            background-color: #252525;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: left;
+            display: none;
+        }
+        .sinopsis-container h3 {
+            margin-top: 0;
+        }
+        .btn-cerrar {
+            background-color: #e63946;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -84,6 +110,13 @@
         
         <div id="catalogo" class="catalogo"></div>
         
+        <div id="sinopsisContainer" class="sinopsis-container">
+            <h3 id="sinopsisTitulo"></h3>
+            <p id="sinopsisTexto"></p>
+            <button id="btnCerrarSinopsis" class="btn-cerrar">Cerrar</button>
+            <button id="btnVerVideo" class="btn-cerrar" style="background-color: #4CAF50; margin-left: 10px;">Ver video</button>
+        </div>
+        
         <div id="videoContainer">
             <h2 id="videoTitulo"></h2>
             <video id="videoPlayer" width="800" height="450" controls></video>
@@ -94,26 +127,54 @@
     </div>
     
     <script>
-        // Datos de ejemplo
+        // Datos de ejemplo con sinopsis
         const data = {
             peliculas: {
                 "Acción": [
-                    { titulo: "Deadpool & Wolverine", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", video: "https://yhqd4yg264.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/iframes-v1-a1.m3u8?t=lrorYmOTTWRgtQ9ipn1Gi5uhOp8hIYWeMikUglmswi4&s=1742312294&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" },
-                    { titulo: "El Reino del Planeta de los Simios", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FzMvtEvWqZnNfDDOczIuR5ZSKPpB.jpg&w=640&q=75", video: "https://example.com/video2.m3u8" }
+                    { 
+                        titulo: "Deadpool & Wolverine", 
+                        imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", 
+                        video: "https://yhqd4yg264.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/iframes-v1-a1.m3u8?t=lrorYmOTTWRgtQ9ipn1Gi5uhOp8hIYWeMikUglmswi4&s=1742312294&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133",
+                        sinopsis: "Deadpool deberá convencer a un Wolverine retirado para que regrese a la acción y salve el futuro multiversal. Juntos, estos dos antihéroes emprenderán un viaje épico que cambiará para siempre la cronología del MCU."
+                    },
+                    { 
+                        titulo: "El Reino del Planeta de los Simios", 
+                        imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FzMvtEvWqZnNfDDOczIuR5ZSKPpB.jpg&w=640&q=75", 
+                        video: "https://example.com/video2.m3u8",
+                        sinopsis: "Muchas generaciones después del reinado de César, los simios son la especie dominante del planeta y los humanos viven en las sombras. Un nuevo y tiránico líder simio construye su imperio, mientras un joven simio emprende un viaje que le llevará a cuestionar todo lo que sabe sobre el pasado."
+                    }
                 ],
                 "Drama": [
-                    { titulo: "El Padrino", imagen: "https://cuevana.biz/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", video: "https://mx9skjnui4es.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/index-v1-a1.m3u8?t=69SPoqxIDY8iDKMBrje4nLfXAkpQQPoZasCka7y8FZA&s=1742313222&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133" }
+                    { 
+                        titulo: "El Padrino", 
+                        imagen: "https://cuevana.biz/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FjkOgeASTlWwyKLBNblHVwWmAKhD.jpg&w=640&q=75", 
+                        video: "https://mx9skjnui4es.premilkyway.com/hls2/01/06394/i4m7e115eth7_n/index-v1-a1.m3u8?t=69SPoqxIDY8iDKMBrje4nLfXAkpQQPoZasCka7y8FZA&s=1742313222&e=129600&f=32051032&srv=jubDiYuWLQCqfHI&i=0.4&sp=500&p1=jubDiYuWLQCqfHI&p2=jubDiYuWLQCqfHI&asn=273133",
+                        sinopsis: "La historia de la familia Corleone, una de las más poderosas dinastías criminales de Nueva York. Don Vito Corleone es respetado y temido por todos. Su hijo Michael Corleone se ve obligado a tomar el control del imperio familiar tras un atentado contra su padre."
+                    }
                 ]
             },
             series: {
                 "Comedia": [
-                    { titulo: "Friends", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FbQ1fuCUJOuJgzK2NvZhj315xZX9.jpg&w=640&q=75", video: "https://example.com/video4.m3u8" }
+                    { 
+                        titulo: "Friends", 
+                        imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FbQ1fuCUJOuJgzK2NvZhj315xZX9.jpg&w=640&q=75", 
+                        video: "https://example.com/video4.m3u8",
+                        sinopsis: "Las aventuras y desventuras de seis amigos que viven en Manhattan. Rachel, Monica, Phoebe, Joey, Chandler y Ross conforman este grupo de inseparables amigos que viven en Nueva York y comparten su día a día."
+                    }
                 ],
                 "Terror": [
-                    { titulo: "Stranger Things", imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FvrfGm3HLsVUK9zUUMkuPf1kPc3c.jpg&w=640&q=75", video: "https://example.com/video5.m3u8" }
+                    { 
+                        titulo: "Stranger Things", 
+                        imagen: "https://www.cuevana.is/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Foriginal%2FvrfGm3HLsVUK9zUUMkuPf1kPc3c.jpg&w=640&q=75", 
+                        video: "https://example.com/video5.m3u8",
+                        sinopsis: "Cuando un niño desaparece en un pequeño pueblo, sus amigos, familiares y la policía se ven envueltos en una serie de eventos misteriosos al tratar de encontrarlo. Sus investigaciones les conducen a un extraño experimento secreto del gobierno y a una niña con poderes extraordinarios."
+                    }
                 ]
             }
         };
+        
+        // Variables globales para el item seleccionado
+        let selectedItem = null;
         
         // Inicializar eventos
         document.addEventListener('DOMContentLoaded', function() {
@@ -124,6 +185,8 @@
         function initializeEventListeners() {
             document.getElementById("categoria").addEventListener("change", handleCategoryChange);
             document.getElementById("genero").addEventListener("change", handleGenreChange);
+            document.getElementById("btnCerrarSinopsis").addEventListener("click", cerrarSinopsis);
+            document.getElementById("btnVerVideo").addEventListener("click", reproducirVideoSeleccionado);
         }
         
         // Manejar cambio de categoría
@@ -131,9 +194,11 @@
             const generoSelect = document.getElementById("genero");
             const catalogoDiv = document.getElementById("catalogo");
             const videoContainer = document.getElementById("videoContainer");
+            const sinopsisContainer = document.getElementById("sinopsisContainer");
             
             catalogoDiv.innerHTML = "";
             videoContainer.style.display = "none";
+            sinopsisContainer.style.display = "none";
             
             if (this.value) {
                 generoSelect.innerHTML = "<option value=''>Selecciona un género</option>";
@@ -164,9 +229,44 @@
                              onerror="this.src='https://via.placeholder.com/150x220?text=Sin+Imagen'">
                         <p>${item.titulo}</p>
                     `;
-                    div.addEventListener("click", () => mostrarVideo(item));
+                    div.addEventListener("click", () => mostrarSinopsis(item));
                     catalogoDiv.appendChild(div);
                 });
+            }
+        }
+        
+        // Mostrar sinopsis
+        function mostrarSinopsis(item) {
+            selectedItem = item;
+            const sinopsisContainer = document.getElementById("sinopsisContainer");
+            const sinopsisTitulo = document.getElementById("sinopsisTitulo");
+            const sinopsisTexto = document.getElementById("sinopsisTexto");
+            
+            sinopsisTitulo.textContent = item.titulo;
+            sinopsisTexto.textContent = item.sinopsis;
+            
+            sinopsisContainer.style.display = "block";
+            
+            // Ocultar el video si estaba visible
+            document.getElementById("videoContainer").style.display = "none";
+            
+            // Scroll hasta la sinopsis
+            window.scrollTo({
+                top: sinopsisContainer.offsetTop,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Cerrar sinopsis
+        function cerrarSinopsis() {
+            document.getElementById("sinopsisContainer").style.display = "none";
+        }
+        
+        // Reproducir video del item seleccionado
+        function reproducirVideoSeleccionado() {
+            if (selectedItem) {
+                mostrarVideo(selectedItem);
+                cerrarSinopsis();
             }
         }
         
